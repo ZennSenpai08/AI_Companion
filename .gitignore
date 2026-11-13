@@ -1,0 +1,9 @@
+/offline-ai-companion-git-backup/
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+*.gguf
+*.safetensors

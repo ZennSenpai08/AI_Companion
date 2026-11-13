@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+<title>Mika · Setup and recovery</title><link rel="stylesheet" href="style.css"></head>
+<body><main><header><span class="spark">✦</span><span>MIKA <small>DESKTOP COMPANION</small></span><b>MIC OFF</b></header>
+<section id="panel"><p class="eyebrow">LOCAL BY DESIGN</p><h1>A little company.<br>A space of your own.</h1>
+<p class="lead">Mika is being built for your desktop. Set up the local services to continue.</p>
+<div class="notice"><strong>Foundation preview</strong><p>The Vue interface has not been built. This recovery panel can check the backend and restore desktop controls. Live2D, chat and speech are not active.</p></div>
+<h2>Local assistant service</h2><p id="status" role="status">Checking…</p><p id="error" role="alert"></p>
+<div class="buttons"><button id="retry">Retry backend</button><button id="diagnostics" class="quiet">Show diagnostics</button></div>
+<pre id="details" hidden></pre><h2>Desktop controls</h2>
+<div class="buttons"><button id="reset" class="quiet">Restore companion</button><button id="topmost" class="quiet">Toggle always on top</button><button id="click" class="quiet">Toggle click through</button></div>
+<p class="hint">Click through recovery: tray menu or Ctrl + Shift + M. No microphone access is requested.</p>
+<button id="quit" class="quiet">Quit Mika</button></section>
+<section id="avatar" hidden><div class="drag">✦ MIKA <span>drag to move</span></div>
+<div class="orb">✦</div><h1>Mika</h1><p>Live2D setup pending</p><p class="hint">This is a diagnostic window.</p><button id="settings">Open settings</button><button id="hide" class="quiet">Hide</button></section>
+<footer>OFFLINE FIRST <span>Original character · Local storage · Your control</span></footer></main><script src="recovery.js"></script></body></html>
