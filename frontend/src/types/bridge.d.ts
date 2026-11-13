@@ -19,6 +19,7 @@ export interface Readiness {
   ollama: {available: boolean; models: Array<{name: string; size_bytes: number}>; message: string}
 }
 export interface DesktopBridge {
+  readonly security: Readonly<{sandboxed: boolean; contextIsolated: boolean}>
   preferences(change?: Partial<Preferences>): Promise<Preferences>
   readiness(): Promise<Readiness>
   sendText(input: {text: string; model: string; language: string}): Promise<{started: true; sequence: number} | {started: false; error: string}>

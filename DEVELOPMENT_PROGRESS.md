@@ -1,4 +1,122 @@
-# Development progress — 2026-11-13
+# Development progress — 2026-11-14
+
+## Latest Vue-unblock and actual-app preparation
+
+Accepted and inspected the user's genuine visible-native result: normal-session startup,
+renderer security and visible content PASS. Graceful shutdown remains INCONCLUSIVE because
+the launcher was interrupted/SIGTERM; no repeated ACL repair or security downgrade.
+
+Implemented separate startup/visibility/shutdown report classification, preserving raw
+evidence. Diagnosed missing Vue toolchain as an incomplete npm install, with no lockfile.
+Npm is intended (11.10.0 observed); all exact pins retained. Cache is writable and DNS
+works, but registry sockets are denied with Windows 10013. Actual safe lock-only preparation
+fails EACCES; nothing was installed and no lockfile invented. Requested normal-session
+dependency preparation with exact commands in docs/FRONTEND_BUILD.md.
+
+Checkpoint d87e4d created before the actual-app integration changes. Strengthened the real
+Mika desktop smoke: built Vue required, both mounts/preload/security/IPC/backend health
+checked, then actual backend process/port cleanup after app.quit. Recovery/probe output
+cannot satisfy it. Added readonly preload security flags; original isolation/no-Node
+settings are preserved. Fixed backend startup ordering so immediate Vue settings IPC does
+not race an unbound backend port. Existing retry behavior remains available on failure.
+
+Verified 40 Node passes (zero skips/failures), Electron/core type checks and lint. These
+include report fixtures and real backend tests; actual Vue UI is still NOT YET VERIFIED.
+The full Vue production build is BLOCKED pending dependency files; the actual-app launcher
+now reports that prerequisite without falsely testing a recovery page. Next authorized
+work: full Vue checks/build, real Mika dev/native acceptance and independent graceful exit,
+then resume later companion phases. No new ML/speech/avatar/installer feature claimed.
+
+## Latest visible-window task
+
+Normal Windows PowerShell Electron 45.3.0 runtime and sandboxed rendering are PASS.
+Inspected the actual user-run JSON: app ready, native handle, secure renderer, nonempty
+capture, empty stderr and exit 0. The recorded false visibility remains a separate open
+criterion; original aggregate result and automated probe behavior were not changed.
+
+Created a separate interactive visible-native-probe launcher/app with show-on-ready,
+visible startup policy, exact requested title/text, readonly preload security proof and
+manual close. It writes per-run logs and captures, with user appearance confirmation kept
+separate. Strict TypeScript, relevant lint, 3 desktop security tests and CLI help passed.
+The normal-user appearance check is pending; the agent has not pretended to see the window.
+
+Source analysis found windowsHide:true mapping to Windows SW_HIDE as the likely reason
+for the old false result. Preserved all original automated probe files (verified against
+checkpoint 7b493f9). Corrected the same GUI hiding option only on Mika's actual Electron
+dev child. No security settings, ACLs, framework, dependency pins or backend architecture
+were changed. Optional npm alias test:native-visible added; no new dependency.
+
+Inspected actual main/preload/Vue sources. Vue build toolchain and lockfile remain absent;
+the registry rejects pinned Vue metadata with EACCES. Actual production build fails at
+missing vue-tsc. These exact outcomes are recorded. Actual Mika Vue/native/preload/backend
+acceptance is still open. Resume later product phases after that genuine desktop gate.
+
+Files: scripts/run-visible-native-probe.cjs, scripts/visible-native-probe/*,
+scripts/dev.cjs, tsconfig.electron.json, package.json and current reports. No repeat ACL
+repair or agent token experiments in this task. Earlier findings below are historical.
+
+## Approved RX repair (prior checkpoint evidence)
+
+The user accepted preserving inherited parent Write access and requiring derived Electron
+sandbox-token write denial. Applied only the approved offline-user RX ACE to project
+node_modules/electron/dist. Validated all 76 backup entries before mutation. Comparison
+shows only the intended RX additions, original ACEs/owners/groups preserved, readable
+parent ACLs unchanged and backup/Git-index hashes intact. No rollback condition occurred.
+
+Actual controlled LOW/restricted-thread I/O opens/reads the runtime with execute access
+and receives ACCESS_DENIED on a nonce-named CREATE_NEW write attempt. Parent rights are
+unchanged. The helper reverts its temporary thread token immediately; no primary token
+or application sandbox policy changes. This is stronger evidence than memory-only checks,
+but is not a running renderer or native-window acceptance.
+
+Immediate native probe now reaches app readiness and creates a native handle: original
+ACL fatal is removed. Renderer launch then fails with sandbox 49 / Windows 87 and GPU
+0xC0000135. Actual Mika smoke and a sandboxed software-rendering probe also failed.
+New token-creation blocker was reproduced independently and matches Chromium's Windows
+error histogram. Current agent context remains restricted on a private desktop; no normal
+user-session results have arrived. No displayed UI/preload/Vue success is claimed.
+
+Added reproducible token audit and controlled-I/O diagnostic; kept software rendering as
+an explicit probe-only option. Targeted verification passed all six commands: strict
+Electron types, relevant ESLint, 3 desktop security tests, 2 real backend lifecycle tests,
+Python diagnostic style and import checks. Fixed a single line-length failure and retained
+its original result. No new dependency, framework migration or unrelated feature added.
+
+User's resume-after-genuine-native-acceptance condition remains open. Model/speech/Live2D/
+installer development has not resumed. Vue dependencies remain unavailable and no Vue
+cache entry was found during the continuation. The next required acceptance evidence is
+the normal-session probe and actual Mika launch; existing commands collect it securely.
+All commands/outcomes and artifact paths are in TEST_RESULTS.md and the focused report.
+
+## Earlier focused Electron-only session (before repair)
+
+Conditional repair authorization received. Before execution, verified the exact command
+matches runtime-only RX and offline SID; parsed/validated all 76 backup ACLs against the
+live tree. Effective-access preflight showed existing inherited parent-account Write
+access, whereas only the derived Electron sandbox token denies writes. Asked to clarify
+condition 9 before changing permissions; making the parent non-writable would require
+additional unapproved changes. Grant/probe deferred pending that clarification. All ACLs
+remain untouched; exact evidence is in authorized-repair-preflight.json and the focused
+investigation report. No unrelated development during this authorization turn.
+
+See docs/ELECTRON_STARTUP_INVESTIGATION.md. Preserved/recovered 1ed5421 from its exact
+bundle and verified original protected index hash unchanged. No unrelated functionality
+was developed. Instrumented native probe now proves JavaScript main runs, then fails
+before app readiness; earlier "before application code" descriptions are superseded.
+
+Actual kernel AccessCheck on disposable low/restricted token and memory descriptor copies
+reproduces the read failure. Existing AAP read and simulated ARAP read do not fix it;
+the current offline identity's simulated RX ACE allows read, with write still denied.
+Cause is the derived token's restricting-SID intersection losing workspace SID access.
+All 76 runtime ACL entries exported before proposing the minimum identity RX grant on
+node_modules/electron/dist. Approval requested; **no filesystem ACL has been changed**.
+
+Added read-only ACL audit/process observer, opt-in scoped repair helper and stage/logging/
+visible-window/security/capture evidence in native probe; desktop smoke now preserves
+per-run logs instead of overwriting earlier evidence. Five targeted verification commands
+passed: strict Electron types, Electron/diagnostic lint, 3 desktop policy tests, Python
+diagnostic style/import checks. Native launch remains BLOCKED until authorized repair
+and actual retest. No sandbox bypass, private-desktop escape or normal-session comparison.
 
 ## Current status
 
@@ -6,17 +124,70 @@
   Final runtime versions, voice benchmark, exact checkpoint terms and Live2D/Core fit
   remain unresolved. No weights or character packages downloaded.
 - **Phase 1: BLOCKED at runtime acceptance.** Foundation source and tests implemented.
-  FastAPI now starts and passes real API/subprocess acceptance in .venv-runtime. Vue
-  installation and native Electron remain blocked. No successful desktop launch claimed.
+  FastAPI passes actual API/subprocess checks in .venv-runtime. Normal PowerShell Electron
+  runtime/security/rendering now PASS. Vue build and actual visible Mika UI integration
+  remain open; the restricted-agent limitation is a separate context, not a general failure.
 - **Phase 2: IN PROGRESS (independent code only).** Native overlay/tray/bounds/recovery
   controls written; pure bounds tests pass. Visual and real multi-monitor checks unrun.
 - **Phase 3: BLOCKED.** Compatible licensed SDK/Core/model not provisioned; no Live2D render.
 - **Phases 4, 5, 9: IN PROGRESS (independent core only).** Local Ollama adapter, persona
   assembly, streamed text orchestration and approved SQLite memory implemented. Unit/
-  fixture tests pass; real LLM, API and UI acceptance unverified.
-- **Phases 6–8, 10–18: NOT STARTED**, except evaluation/release planning and foundation
-  cancellation tests. No microphone, STT, TTS, audio playback, lip sync, emotional LLM
-  schema, optional integrations, complete settings, optimization or installer exists.
+  fixture and actual API tests pass; real LLM and UI acceptance remain unverified.
+- **Phase 7: BLOCKED.** Optional Windows voice adapter enumerates real voices and cancels
+  its helper safely, but actual Zira synthesis fails with access denied. OmniVoice is not
+  installed or benchmarked. No voice is activated in the conversation pipeline.
+- **Phase 15: IN PROGRESS (source only).** Persistent preferences, readiness/errors and
+  memory search added to existing Vue settings. Full Vue/native QA remains blocked.
+- **Phases 6, 8, 10–14, 16–18: NOT STARTED**, except evaluation/release planning and
+  independent foundation tests. No mic capture, STT, playback, lip sync, real emotion
+  pipeline, optional integrations, measured model performance or installer exists.
+
+## Latest continuation — checkpoint audit and unblocked implementation
+
+Original bundle 73d28fe verifies with complete history; ref listing and fresh isolated
+import/fsck succeeded. Active inspected source is Mika/Vue; no inspected React/Zyrah
+implementation or migration evidence. Remote branch enumeration was unavailable; the
+published-description discrepancy remains explicit in docs/PROJECT_IDENTITY.md.
+
+During this work user commit fa5871e relocated the app to the workspace root. That commit,
+protected parent .git, existing sources and Git backup are preserved. No rewrite, reset,
+branch checkout, parent staging or external publication was performed.
+
+Added secure minimal Electron probe and read-only Win32 token inspection. Application and
+minimal probe fail before app startup with Electron 45.3.0's install-directory sandbox
+fatal error, including after relocation. AAP RX already exists in displayed runtime/file
+ACLs. The process is a restricted CodexSandboxOffline token, not AppContainer. No minimum
+effective repair is established; no ACL change or sandbox bypass was made. Normal
+interactive session comparison is unavailable here. See docs/ELECTRON_DIAGNOSTICS.md.
+
+Implemented strict SQLite preferences, bounded local Ollama catalog/readiness, Vue settings
+and errors, chat defaults and memory search. Fixed Unicode export size accounting with a
+bounded HTTP byte limit. Added optional isolated Windows SAPI adapter and benchmark;
+actual Microsoft Zira synthesis returns access denied, so no audio/quality claim. Optional
+pywin32 311 was installed only in .venv-runtime from a compatible verified cache wheel.
+
+Commands executed: git bundle verify/list-heads and isolated fetch/fsck; whoami/icacls;
+scripts/windows_context.py; node scripts/run-native-probe.cjs; npm run build;
+scripts/benchmark_sapi.py; node --test tests/node/memory-export.test.cjs; and
+./.venv-runtime/Scripts/python.exe scripts/verify_foundation.py. All eight available
+foundation checks exit 0: **32 Node + 50 Python passes, no failures/skips**. Full Vue
+build fails at missing vue-tsc. Native probe and actual TTS synthesis are BLOCKED.
+Model output tests use an explicit fixture, never represented as real inference.
+
+Main files added/changed: backend/core/preferences.py, backend/llm/readiness.py,
+backend/tts/*, backend/api/app.py and tests; Electron main/preload/http and bridge types;
+EngineSettings.vue/Chat.vue/Memory.vue/Panel.vue; scripts/native-probe/*,
+windows_context.py, benchmark_sapi.py, checkpoint.py, verify_foundation.py;
+tests/node/backend.test.cjs and memory-export.test.cjs; requirements-voice-windows.txt;
+audit, architecture, progress, license and test documents. Some were captured by the
+user's fa5871e relocation commit.
+
+scripts/checkpoint.py creates uniquely named ignored bare metadata/ref/source bundles,
+records commands/results and checks source HEAD/branch/status/index unchanged. Actual
+export identity/verification is recorded in its adjacent JSON manifest; original 73d28fe
+bundle is retained. Next gate: authorized ordinary-Windows native probe and permitted
+frontend dependency preparation, then actual desktop QA. Downloads remain deferred for
+critically low RAM and absent Ollama; no inference checkpoint or licensed avatar exists.
 
 Ordered acceptance gates have not been bypassed. Independent components were developed
 while early environment blockers persisted, as authorized. No product phase marked complete.

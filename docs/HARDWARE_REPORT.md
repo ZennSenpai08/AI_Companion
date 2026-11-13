@@ -1,5 +1,13 @@
 # Hardware report — 2026-11-13
 
+Later continuation observed free RAM varying from approximately 0.12–0.40 GiB, then
+0.0877 GiB with Windows reporting 99% memory load after user relocation. These are
+time-specific observations, not stable capacity. No neural model/VAD allocation was
+attempted under that pressure. Ollama's loopback catalog did not respond, common install
+paths were absent and no project model checkpoint exists. Do not force a model download
+or claim 4B inference fits from total RAM alone. Last GPU query showed RTX 2050, 4096 MiB,
+driver 595.79, about 2610 MiB free VRAM at that query; no acceleration was benchmarked.
+
 Measured through Node OS APIs, registry, PowerShell and nvidia-smi. No estimates are
 presented as measurements.
 

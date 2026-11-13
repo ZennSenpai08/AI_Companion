@@ -1,7 +1,21 @@
-# Speech and language evaluation — NOT RUN
+# Speech and language evaluation — synthesis attempt BLOCKED
 
-No recorded clips, synthesis model or voice reference was provisioned. No speech speed,
-naturalness, Filipino pronunciation or voice identity result is available.
+No recorded clips, neural synthesis model or licensed voice reference was provisioned.
+No speech speed, naturalness, Filipino pronunciation or voice identity result is available.
+
+An actual fallback diagnostic used installed Windows SAPI voices with pywin32 311.
+Enumeration returned Microsoft David Desktop (male/en-US) and Microsoft Zira Desktop
+(female/en-US). scripts/benchmark_sapi.py selected Zira and attempted plain-text memory
+output. The engine returned access denied (inner COM HRESULT 0x80070005) before the first
+English sample was produced. Filipino/Taglish samples were not reached. No WAV, listening
+review, synthesis latency/RTF or emotional control was verified. No voice is redistributed.
+Raw result: test-artifacts/voice/sapi-benchmark.json.
+
+The optional adapter isolates COM in a fixed Python child with deadline, cancellation/EOF
+cleanup and bounded PCM/WAV. Actual voice discovery and helper cancellation tests pass;
+the format test explicitly uses fixture PCM. It is not activated in chat. Installed
+English voices are not evidence of Filipino suitability. OmniVoice remains the initial
+neural candidate, not installed or benchmarked due resource/dependency blockers.
 
 Evaluate STT, LLM and TTS separately, then the full pipeline. Use licensed or consented
 recordings only; keep raw private clips outside Git. Human Filipino/English speakers should

@@ -1,4 +1,7 @@
 const http = require('node:http');
+// The bounded SQLite store permits 2000 facts of 500 Unicode characters plus metadata.
+// JSON export and 50-message history can legitimately exceed 2 MiB in UTF-8.
+const MAX_RESPONSE_BYTES = 8 * 1024 * 1024;
 /** @param {number} port @param {string} token @param {string} route @param {object | null} [body] */
 function requestLocal(port, token, route, body = null) {
   if (!Number.isInteger(port) || port < 1 || port > 65535 ||
@@ -9,10 +12,12 @@ function requestLocal(port, token, route, body = null) {
     const request = http.request({ method: body ? 'POST' : 'GET', hostname: '127.0.0.1', port, path: route,
       agent: false, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, timeout: 2500 }, response => {
       let data = '';
+      let receivedBytes = 0;
       response.setEncoding('utf8');
       response.on('data', chunk => {
+        receivedBytes += Buffer.byteLength(chunk, 'utf8');
         data += chunk;
-        if (data.length > 2 * 1024 * 1024) request.destroy(new Error('Response too large'));
+        if (receivedBytes > MAX_RESPONSE_BYTES) request.destroy(new Error('Response too large'));
       });
       response.on('error', reject);
       response.on('end', () => {
@@ -25,4 +30,4 @@ function requestLocal(port, token, route, body = null) {
     request.end(body ? JSON.stringify(body) : undefined);
   });
 }
-module.exports = { requestLocal };
+module.exports = { requestLocal, MAX_RESPONSE_BYTES };

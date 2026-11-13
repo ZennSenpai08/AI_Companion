@@ -1,6 +1,33 @@
 # Native Electron investigation — 2026-11-13
 
-Status: **BLOCKED in coding environment**. No security relaxation applied.
+Status: **BLOCKED in coding environment at renderer token creation**. Approved runtime-only
+identity RX repair is applied and removes the original fatal. Sandbox protections retained.
+
+Latest focused investigation: [ELECTRON_STARTUP_INVESTIGATION.md](ELECTRON_STARTUP_INVESTIGATION.md).
+Actual post-repair markers show JS main, app readiness and native handle creation. The
+renderer then fails sandbox 49 / Windows 87, reproduced by a nested lockdown-token audit.
+Real controlled I/O confirms restricted-token read/execute and denied Write; original
+parent rights are preserved. Earlier unmodified observations below are historical, not
+current permission state. See the focused report for current results and normal-session test.
+
+## Retest after user relocation
+
+After user commit fa5871e moved the application to the workspace root, the same minimal
+probe was executed again at 2026-11-13T12:58:22Z. Electron 45.3.0 still exits
+2147483651 before readiness. The currently affected directory is
+`C:\Users\Romcill\Desktop\AI-PROJECT\node_modules\electron\dist`.
+Current complete stderr is preserved in test-artifacts/investigation/native-probe.json:
+
+```
+[522540:1113/205822.200:ERROR:components\os_crypt\sync\os_crypt_win.cc:77] Failed to encrypt: The system cannot find the file specified. (0x2)
+[522540:1113/205822.336:FATAL:electron\shell\browser\win\install_dir_access.cc:52] Sandboxed processes cannot read C:\Users\Romcill\Desktop\AI-PROJECT\node_modules\electron\dist: its ACL has an entry for an AppContainer package SID but none for ALL APPLICATION PACKAGES, so Windows denies the sandbox token access. Grant it with: icacls "C:\Users\Romcill\Desktop\AI-PROJECT\node_modules\electron\dist" /grant *S-1-15-2-1:(OI)(CI)(RX)
+```
+
+The quoted grant is Electron's diagnostic text, not an authorized repair command. No ACL
+changes were made. A fresh read-only icacls listing at the relocated path also shows AAP
+RX on both the runtime directory and icudtl.dat, without a displayed S-1-15 package ACE.
+The earlier ACL exports below describe the pre-relocation path; they must not be restored
+at a different location. A normal-session comparison and effective-token analysis remain open.
 
 ## Reproduction and isolation
 

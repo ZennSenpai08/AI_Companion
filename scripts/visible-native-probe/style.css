@@ -1,0 +1,7 @@
+:root { font-family: 'Segoe UI', sans-serif; color: #172033; background: #f4f6fb; }
+body { margin: 0; }
+main { max-width: 560px; padding: 32px; margin: auto; }
+.label { color: #5849aa; font-size: 12px; font-weight: 700; letter-spacing: .12em; }
+h1 { font-size: 29px; line-height: 1.2; }
+p { line-height: 1.55; }
+.close-note { border-top: 1px solid #cbd2e3; padding-top: 18px; font-weight: 600; }

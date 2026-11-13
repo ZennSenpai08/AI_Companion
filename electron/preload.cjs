@@ -1,5 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('mika', Object.freeze({
+  security: Object.freeze({ sandboxed: process.sandboxed === true,
+    contextIsolated: process.contextIsolated === true }),
 /** @param {object} input */
   sendText: input => ipcRenderer.invoke('mika:chat-start', input),
   stopText: () => ipcRenderer.invoke('mika:chat-stop'),

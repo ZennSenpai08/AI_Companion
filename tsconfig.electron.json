@@ -15,6 +15,7 @@
   "include": [
     "electron/**/*.cjs",
     "scripts/*.cjs",
-    "scripts/native-probe/*.cjs"
+    "scripts/native-probe/*.cjs",
+    "scripts/visible-native-probe/*.cjs"
   ]
 }

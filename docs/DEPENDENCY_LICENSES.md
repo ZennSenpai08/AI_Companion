@@ -71,3 +71,15 @@ Direct pins: requirements.txt; executed runtime dependency set: requirements-run
 Primary package metadata checked: https://pypi.org/pypi/fastapi/0.140.13/json,
 https://pypi.org/pypi/starlette/1.3.1/json, https://pypi.org/pypi/uvicorn/0.52.0/json.
 Actual notices remain preserved in the installed wheel dist-info; no installer distributed.
+
+## Optional native voice diagnostic
+
+pywin32 311 is installed only in .venv-runtime from a RECORD/tag-checked local cp310 wheel;
+requirements-voice-windows.txt keeps it optional and Windows-only. Installed metadata
+declares PSF, and component license notices remain in its dist-info. Upstream:
+https://github.com/mhammond/pywin32. Preserve all component notices before redistribution.
+
+Microsoft David/Zira are pre-existing Windows voices, not assets licensed or shipped by
+this project. No voice files, recordings or clones were extracted. The adapter attempts
+normal installed-engine synthesis; its current failure does not establish quality or
+redistribution rights. No new release permission or neural weight license is inferred.

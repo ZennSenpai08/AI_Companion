@@ -20,7 +20,8 @@
     "test:desktop": "node scripts/desktop-smoke.cjs",
     "typecheck:core": "node node_modules/typescript/bin/tsc -p tsconfig.renderer-core.json",
     "lint:js": "node node_modules/eslint/bin/eslint.js electron scripts tests/node frontend/src/services",
-    "test:native-probe": "node scripts/run-native-probe.cjs"
+    "test:native-probe": "node scripts/run-native-probe.cjs",
+    "test:native-visible": "node scripts/run-visible-native-probe.cjs"
   },
   "dependencies": {
     "vue": "3.5.45"

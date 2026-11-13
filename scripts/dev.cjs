@@ -20,7 +20,8 @@ vite.on('exit', () => { stop(); });
         const executable = path.join(root, 'node_modules/electron/dist', process.platform === 'win32' ? 'electron.exe' : 'electron');
         /** @type {NodeJS.ProcessEnv} */
         const env = { ...process.env, MIKA_DEV: '1' }; delete env.ELECTRON_RUN_AS_NODE;
-        desktop = spawn(executable, ['.'], { cwd: root, stdio: 'inherit', env, windowsHide: true, shell: false });
+        // Electron owns visible desktop windows; do not inherit a SW_HIDE startup request.
+        desktop = spawn(executable, ['.'], { cwd: root, stdio: 'inherit', env, windowsHide: false, shell: false });
         desktop.on('error', () => { console.error('Electron could not start. Run setup first.'); stop(); process.exitCode = 1; });
         desktop.on('exit', code => { stop(); process.exitCode = code ?? 1; });
         return;

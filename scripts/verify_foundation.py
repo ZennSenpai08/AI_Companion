@@ -22,7 +22,8 @@ def main():
         (ROOT / "tests" / "node").glob("*.test.cjs"))]
     python_style_paths = ["backend", "scripts/offline_guard.py", "scripts/offline_smoke.py",
                           "scripts/recover_cached_wheels.py", "scripts/verify_foundation.py",
-                          "scripts/windows_context.py", "scripts/benchmark_sapi.py"]
+                          "scripts/windows_context.py", "scripts/benchmark_sapi.py",
+                          "scripts/checkpoint.py"]
     checks = [
         ("node-tests", ["node", "--test", *node_tests]),
         ("python-guarded-tests", [python, "scripts/offline_smoke.py"]),

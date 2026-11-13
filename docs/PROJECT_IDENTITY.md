@@ -1,6 +1,15 @@
 # Project identity audit — 2026-11-13
 
-## Observed repository relationship
+## Latest relocation checkpoint
+
+During continuation, a user-side commit `fa5871e0d18c07ab1c5fb9095b5e8155c15b1e7a`
+(Project) moved the application from offline-ai-companion/ to the workspace root. The
+root package.json and frontend/ remain the same Mika/Vue implementation. Work resumed
+there without recreating the subdirectory, rewriting the frontend, altering the user's
+commit or staging the preserved Git backup. Local current HEAD is fa5871e; earlier
+observations below describe the pre-relocation tree. No push is inferred for this commit.
+
+## Observed repository relationship before relocation
 
 - Parent remote: https://github.com/ZennSenpai08/AI_Companion.git (fetch/push).
 - Local main and cached origin/main: 18bc3d3, Add offline AI companion project.

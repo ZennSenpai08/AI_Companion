@@ -39,6 +39,13 @@ the native recovery panel to start without the renderer build. Vue panels use Ty
 The dependency-free recovery UI supports diagnostics and desktop recovery only; it does
 not substitute for the unbuilt Vue chat or claim to render a Live2D model.
 
+The main process completes the supervised backend handshake before loading the Vue pages,
+whose mount hooks immediately request settings/status. A failed handshake still permits
+the existing retry interface. Readonly preload security flags expose booleans only. The
+actual-app smoke requires both Vue mounts, OS renderer sandbox evidence, preload/IPC,
+authenticated backend health and process/socket cleanup; fixture report tests do not
+constitute native acceptance.
+
 ## Verified continuation boundaries
 
 Both HTTP readers enforce line/transfer limits and an absolute deadline. Ollama packets
@@ -64,3 +71,22 @@ by the production bootstrap. Node supervisor tests verify authenticated health a
 through restart and listener/process cleanup. A further real-socket test exercises the full
 text API/adapter path with fixture-only model inference, including disconnect cancellation.
 These backend tests do not establish native renderer/desktop or real-model acceptance.
+
+## Local preferences and engine diagnostics
+
+Authenticated /preferences GET/POST persists a strict model/language/volume/animation/cursor
+allowlist in SQLite; unknown settings and invalid values are rejected. History deletion
+does not delete preferences. /models queries only fixed loopback Ollama tags, with proxy,
+redirect and response-size limits. It never downloads weights. Main adds actual free RAM
+and truthful microphone/voice/avatar readiness; unavailable capabilities stay disabled.
+Vue settings consume the existing narrow preload bridge. These Vue additions are source
+only until the missing frontend toolchain and native launch gates pass.
+
+The optional Windows SAPI adapter uses a fixed Python COM child module with stdin JSON,
+plain-text synthesis and memory PCM output. Deadline/cancellation terminates and waits for
+the child. No shell, voice cloning, network or audio-device playback is involved. Installed
+voice enumeration works; synthesis is denied in this security context. It is not activated
+in the conversation pipeline. OmniVoice/STT/Live2D remain unprovisioned.
+
+The local HTTP bridge counts UTF-8 bytes with an 8 MiB transfer ceiling, accommodating
+the bounded SQLite Unicode fact export while still rejecting oversized responses.

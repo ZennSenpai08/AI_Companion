@@ -273,14 +273,33 @@ else {
     rebuildTray();
     globalShortcut.register('CommandOrControl+Shift+M', () => { resetPosition(); void showPanel(); });
     screen.on('display-removed', recover); screen.on('display-metrics-changed', recover);
+    // Vue mounts issue settings/status IPC immediately; finish the local startup
+    // handshake before loading either page so those calls do not race port=0.
+    await startBackend();
+    if (closing || quitting) return;
     await loadWindow(overlay, true);
     overlay.show();
     await showPanel();
-    await startBackend();
     if (!app.isPackaged && process.env.MIKA_SMOKE_TEST === '1') {
+      if (!panel) throw new Error('Mika panel did not initialize');
+      const currentPanel = panel;
+      const frameProof = "({ nodeExposed: typeof require !== 'undefined' || typeof process !== 'undefined', bridgePresent: typeof window.mika?.status === 'function', vueMounted: Boolean(document.querySelector('#app[data-v-app]')), security: window.mika?.security })";
+      /** @param {import('electron').BrowserWindow} win */
+      const windowProof = async win => {
+        const frame = await win.webContents.executeJavaScript(frameProof);
+        const rendererPid = win.webContents.getOSProcessId();
+        return { visible: win.isVisible(), sandbox: frame.security?.sandboxed === true,
+          contextIsolation: frame.security?.contextIsolated === true,
+          nodeIntegration: frame.nodeExposed === true,
+          rendererSandboxed: app.getAppMetrics().find(metric => metric.pid === rendererPid)?.sandboxed === true };
+      };
       /** @type {Record<string, unknown>} */
       const report = { ...status(), windows: BrowserWindow.getAllWindows().length,
-        renderer: await overlay.webContents.executeJavaScript("({ nodeExposed: typeof require !== 'undefined', bridgePresent: typeof window.mika?.status === 'function' })") };
+        renderer: await overlay.webContents.executeJavaScript(frameProof),
+        panelRenderer: await currentPanel.webContents.executeJavaScript(frameProof),
+        nativeWindows: { overlay: await windowProof(overlay), panel: await windowProof(currentPanel) },
+        // Main-only local test artifact; no token and no renderer API exposure.
+        supervision: { backendPid: backend.child?.pid ?? null, backendPort: backend.port } };
       report.ipc = await overlay.webContents.executeJavaScript(`(async () => {
         const before = await window.mika.status();
         const changed = await window.mika.desktop('topmost', !before.desktop.topmost);
@@ -292,13 +311,13 @@ else {
         catch { invalidActionRejected = true; }
         return { topmostToggled: changed.desktop.topmost !== before.desktop.topmost,
           clickThroughRecovered: !reset.desktop.clickThrough, invalidActionRejected,
+          backendReachable: before.backend.status === 'ready' && before.health?.status === 'ok' &&
+            before.health?.service === 'mika-assistant',
           secretExposed: /token|port|pid/i.test(JSON.stringify(Object.keys(before))) };
       })()`);
       fs.mkdirSync(dataDir, { recursive: true });
-      if (panel) {
-        const image = await panel.webContents.capturePage();
-        fs.writeFileSync(path.join(dataDir, 'desktop-preview.png'), image.toPNG());
-      }
+      const image = await currentPanel.webContents.capturePage();
+      fs.writeFileSync(path.join(dataDir, 'desktop-preview.png'), image.toPNG());
       fs.writeFileSync(path.join(dataDir, 'desktop-smoke.json'), JSON.stringify(report, null, 2));
       app.quit();
     }

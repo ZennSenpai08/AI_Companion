@@ -8,9 +8,14 @@ See [development report](docs/DEVELOPMENT_REPORT.md), [progress](DEVELOPMENT_PRO
 The source contains a secure Electron shell, Vue/TypeScript panels, supervised FastAPI
 bootstrap, local Ollama text adapter, original protected Mika profile, and SQLite
 conversation/explicit-memory services. Real FastAPI and supervised-backend checks now pass on the recovered Python 3.10.11
-runtime. Native desktop, Vue build and real-model acceptance remain blocked. STT/TTS/Live2D are not enabled.
+runtime. Normal-session native startup, visibility and sandboxed rendering pass. The real
+Mika Vue interface, graceful shutdown and real-model acceptance remain unverified.
+STT/TTS/Live2D are not enabled.
 
 ## Setup on Windows
+
+For this existing checkout's missing Vue dependencies, use the exact pinned-install and
+actual-application verification commands in [frontend preparation](docs/FRONTEND_BUILD.md).
 
 1. Use working Python 3.12 x64 and Node >=22.12.0. Check `scripts/doctor.ps1`.
 2. In PowerShell from this directory, install development dependencies:
@@ -32,6 +37,38 @@ runtime. Native desktop, Vue build and real-model acceptance remain blocked. STT
    speech acceptance is still pending.
 
 ## Checks available in this workspace
+
+The user-run ordinary Windows PowerShell probe verifies Electron 45.3.0 and sandboxed
+rendering. For a separate window you can actually inspect and close manually, run:
+
+```powershell
+cd C:\Users\Romcill\Desktop\AI-PROJECT
+node scripts/run-visible-native-probe.cjs
+```
+
+It stays open until you close it and saves per-run visibility/security/exit logs. User
+appearance is confirmed by the user; graceful shutdown and the built Vue/Mika interface
+remain pending. This
+diagnostic is separate from the original automated probe; ACLs need no further changes.
+
+The active project now lives at the workspace root after user commit fa5871e. The
+frontend remains Vue; it has not been migrated to React. See [identity audit](docs/PROJECT_IDENTITY.md).
+Latest executed Node suite: 40 passes; the earlier Python suite has 50 passes and was not
+rerun in this task. These do not establish actual Mika UI, model inference or spoken
+conversation. [Native investigation](docs/ELECTRON_STARTUP_INVESTIGATION.md) separates the
+successful normal-session startup from restricted-agent limitations and shutdown evidence.
+
+To preserve current source without writing the restricted main .git:
+
+```powershell
+./.venv-runtime/Scripts/python.exe scripts/checkpoint.py
+```
+
+This creates a fresh ignored bare clone/ref/full-history bundle and adjacent verification
+manifest; it retains previous archives and compares the original branch/index/status.
+Recovery instructions: [checkpoint audit](docs/CHECKPOINT_AUDIT.md). Dependencies/models
+are not bundled. Optional Windows voice discovery works, but actual synthesis is denied
+here; [voice evaluation](docs/VOICE_EVALUATION.md) records the unsuccessful benchmark.
 
 Run `./.venv/Scripts/python.exe scripts/verify_foundation.py` for the available foundation
 suite. It saves each command, exit code and output under `test-artifacts/verification/`.
