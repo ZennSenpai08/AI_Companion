@@ -1,0 +1,17 @@
+# Executed Windows Python 3.10 runtime dependency set; Python 3.12 target untested.
+# Re-resolve/review before release, including different native wheel hashes per Python ABI.
+-r requirements.txt
+annotated-doc==0.0.5
+annotated-types==0.7.0
+anyio==4.9.0
+certifi==2026.10.23
+click==8.3.1
+colorama==0.4.6 ; sys_platform == 'win32'
+exceptiongroup==1.3.1 ; python_version < '3.11'
+h11==0.16.0
+httpcore==1.0.9
+idna==3.20
+pydantic-core==2.41.5
+sniffio==1.3.1
+typing_extensions==4.16.0
+typing-inspection==0.4.2

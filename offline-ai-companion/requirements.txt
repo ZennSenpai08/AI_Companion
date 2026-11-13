@@ -1,6 +1,0 @@
-# Foundation pins. Target Python 3.12 x64; 3.9 can run dependency-free core tests.
-fastapi==0.115.12
-uvicorn==0.34.2
-pydantic==2.11.4
-httpx==0.28.1
-websockets==15.0.1

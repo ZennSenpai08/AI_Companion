@@ -1,0 +1,8 @@
+-r requirements.txt
+pytest==8.3.5
+ruff==0.11.8
+
+# Optional formatting and style checks; Ruff remains the required lint gate.
+autopep8==2.3.2
+isort==6.1.0
+pycodestyle==2.14.0

@@ -1,0 +1,71 @@
+{
+  "name": "mika-offline-companion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Original offline-first Windows desktop companion",
+  "main": "electron/main.cjs",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.cjs",
+    "start": "electron .",
+    "build": "npm run typecheck && vite build",
+    "typecheck": "vue-tsc --noEmit && tsc -p tsconfig.electron.json && npm run typecheck:core",
+    "lint": "npm run lint:js && .venv/Scripts/python.exe -m ruff check backend",
+    "test": "node --test tests/node/*.test.cjs",
+    "test:backend": ".venv/Scripts/python.exe -m unittest discover -s backend/tests -v",
+    "test:offline": ".venv/Scripts/python.exe scripts/offline_smoke.py",
+    "package": "node scripts/release-gate.cjs && electron-builder --win nsis",
+    "test:desktop": "node scripts/desktop-smoke.cjs",
+    "typecheck:core": "node node_modules/typescript/bin/tsc -p tsconfig.renderer-core.json",
+    "lint:js": "node node_modules/eslint/bin/eslint.js electron scripts tests/node frontend/src/services",
+    "test:native-probe": "node scripts/run-native-probe.cjs"
+  },
+  "dependencies": {
+    "vue": "3.5.45"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.34.0",
+    "@types/node": "22.18.12",
+    "@vitejs/plugin-vue": "6.0.1",
+    "electron": "45.3.0",
+    "electron-builder": "26.0.12",
+    "eslint": "9.34.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.1",
+    "vue-tsc": "3.0.6"
+  },
+  "build": {
+    "appId": "local.mika.companion",
+    "productName": "Mika Companion",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**",
+      "dist/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/backend",
+        "to": "backend"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

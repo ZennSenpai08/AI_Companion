@@ -1,0 +1,2 @@
+# Optional native Windows installed-voice adapter; not required by core text service.
+pywin32==311 ; sys_platform == 'win32'

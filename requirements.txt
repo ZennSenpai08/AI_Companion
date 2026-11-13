@@ -1,0 +1,7 @@
+# Tested local text runtime. Python >=3.10 required; Python 3.12 x64 release target.
+fastapi==0.140.13
+starlette==1.3.1
+uvicorn==0.52.0
+pydantic==2.12.5
+httpx==0.28.1
+websockets==15.0.1

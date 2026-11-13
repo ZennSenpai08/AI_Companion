@@ -119,3 +119,13 @@ Microphone (explicit consent) → audio gate / VAD → multilingual STT → lang
 
 ## Guidance for Coding Agents
 At the beginning of each task read this file, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, and relevant tests. Implement the smallest working vertical slice. Update tests and docs alongside code changes. Use local models and real offline smoke tests as acceptance criteria. Prefer maintainable provider interfaces over hard dependencies on any app or web service. Do not silently add optional modules to the critical path. Report what was implemented, which tests were executed, and known limitations accurately. Never fabricate demo performance, model compatibility, license rights, or completion status.
+
+## Required phase workflow and release policy
+Read DEVELOPMENT_PROGRESS.md, TEST_RESULTS.md, KNOWN_ISSUES.md, docs/ARCHITECTURE.md and
+docs/ROADMAP.md before changes. Follow inspect/implement/execute/test/repair/document
+for each ordered phase. Commit verified work locally; never publish without authorization.
+Prefer typed narrow APIs, explicit cancellation, parameterized SQL and dependency pins.
+Record commands and real results, including skipped checks. Packaging must include a
+verified Python runtime/backend, actual dependency notices and model setup instructions.
+Never call a diagnostic visual a Live2D character or a fixture response real inference.
+Do not mark the product complete before offline spoken and installer acceptance pass.

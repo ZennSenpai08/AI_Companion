@@ -1,0 +1,5 @@
+{
+  "name": "mika-native-probe",
+  "private": true,
+  "main": "main.cjs"
+}
