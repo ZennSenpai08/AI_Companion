@@ -3,8 +3,10 @@ import threading
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from unittest.mock import patch
+from unittest.mock import AsyncMock
 
-from backend.llm.readiness import installed_models
+from backend.llm.readiness import installed_models, require_installed
+from backend.llm.provider import ProviderError
 
 
 class CatalogHandler(BaseHTTPRequestHandler):
@@ -23,6 +25,26 @@ class CatalogHandler(BaseHTTPRequestHandler):
 
 
 class ReadinessTests(unittest.IsolatedAsyncioTestCase):
+    async def test_missing_remote_and_unverified_weights_cannot_switch(self):
+        for models in ([], [{"name": "gemma3:1b", "compatible": False}]):
+            with patch("backend.llm.readiness.installed_models", AsyncMock(return_value={"available": True, "models": models})):
+                with self.assertRaises(ProviderError) as caught:
+                    await require_installed("gemma3:1b")
+                self.assertEqual(caught.exception.code, "MODEL_NOT_INSTALLED")
+        catalog = {"available": True, "models": [{"name": "gemma3:1b", "compatible": True}]}
+        for details in ({"details": {"format": "gguf"}, "remote_host": "external"}, {"details": {}}, {"details": None}):
+            with patch("backend.llm.readiness.installed_models", AsyncMock(return_value=catalog)), patch(
+                    "backend.llm.readiness.metadata", AsyncMock(return_value=details)):
+                with self.assertRaises(ProviderError) as caught:
+                    await require_installed("gemma3:1b")
+                self.assertEqual(caught.exception.code, "MODEL_UNVERIFIED")
+
+    async def test_installed_local_gguf_passes_without_inference_or_pull(self):
+        with patch("backend.llm.readiness.installed_models", AsyncMock(return_value={"available": True,
+                "models": [{"name": "gemma3:1b", "compatible": True}]})), patch(
+                "backend.llm.readiness.metadata", AsyncMock(return_value={"details": {"format": "gguf"}})) as call:
+            await require_installed("gemma3:1b")
+            call.assert_awaited_once_with("show", {"model": "gemma3:1b"})
     async def catalog(self, data, status=200):
         server = ThreadingHTTPServer(("127.0.0.1", 0), CatalogHandler)
         server.catalog, server.status, server.paths = data, status, []
@@ -43,7 +65,8 @@ class ReadinessTests(unittest.IsolatedAsyncioTestCase):
         result, paths = await self.catalog({"models": [
             {"name": "qwen3.5:4b", "size": 3000000000}, {"name": "model:cloud", "size": 0}]})
         self.assertTrue(result["available"])
-        self.assertEqual(result["models"], [{"name": "qwen3.5:4b", "size_bytes": 3000000000}])
+        self.assertEqual(result["models"], [{"name": "qwen3.5:4b", "size_bytes": 3000000000,
+                                              "compatible": True, "min_free_gib": 6}])
         self.assertEqual(paths, ["/api/tags"])
 
     async def test_redirects_and_malformed_metadata_fail_closed(self):

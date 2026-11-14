@@ -27,7 +27,7 @@ onMounted(() => execute(async () => { state.value = await window.mika.status() }
   <main>
     <header><span class="spark">✦</span><span>MIKA <small>DESKTOP COMPANION</small></span><b>MIC OFF</b></header>
     <p class="eyebrow">LOCAL BY DESIGN</p><h1>A little company.<br>A space of your own.</h1>
-    <p class="lead">Your companion, on your computer. Start with a healthy local service.</p>
+    <p class="lead">Controls and optional history for your floating companion. Mika's response appears beneath her desktop visual.</p>
     <div class="notice"><strong>Foundation preview</strong><p>Live2D and speech are not enabled yet. Local text and approved memory adapters are available for evaluation after model setup.</p></div>
     <nav aria-label="Companion panels"><button v-for="item in ['chat','memory','settings']" :key="item" :class="{quiet:tab!==item}" @click="tab=item">{{ item }}</button></nav>
     <Chat v-if="tab==='chat'"/><Memory v-if="tab==='memory'"/>

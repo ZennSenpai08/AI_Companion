@@ -3,12 +3,81 @@ import importlib.util
 import json
 import tempfile
 import unittest
+from unittest.mock import AsyncMock, patch
 
 AVAILABLE = all(importlib.util.find_spec(name) for name in ("fastapi", "uvicorn", "httpx"))
 
 
 @unittest.skipUnless(AVAILABLE, "FastAPI/httpx/uvicorn not installed: integration not verified")
 class ApiTests(unittest.IsolatedAsyncioTestCase):
+    async def test_model_replacement_and_unload_are_blocked_during_generation(self):
+        import asyncio
+        from backend.llm.models import DEFAULT_MODEL
+        started, release = asyncio.Event(), asyncio.Event()
+
+        async def delayed(_messages, _model):
+            started.set()
+            await release.wait()
+            yield "synthetic fixture output"
+
+        with patch.object(self.provider, "stream", delayed), patch("backend.api.app.require_installed", AsyncMock()):
+            request = asyncio.create_task(self.client.post("/chat", headers=self.headers, json={"text": "fixture"}))
+            try:
+                await asyncio.wait_for(started.wait(), 3)
+                for route, body in (("/preferences", {"model": "gemma3:1b"}),
+                                    ("/model-unload", {"model": DEFAULT_MODEL})):
+                    response = await self.client.post(route, headers=self.headers, json=body)
+                    self.assertEqual(response.status_code, 409)
+            finally:
+                release.set()
+                await asyncio.wait_for(request, 3)
+
+    async def test_consecutive_chat_model_choices_use_same_sqlite_session(self):
+        from backend.llm.models import DEFAULT_MODEL
+        choices = []
+
+        async def recorded(_messages, model):
+            choices.append(model)
+            yield "synthetic fixture output"
+
+        with patch.object(self.provider, "stream", recorded):
+            for model in (DEFAULT_MODEL, "gemma3:1b", "qwen2.5:1.5b", DEFAULT_MODEL):
+                response = await self.client.post("/chat", headers=self.headers,
+                                                  json={"text": "synthetic continuity check", "model": model})
+                self.assertIn('"type": "done"', response.text)
+        self.assertEqual(choices, [DEFAULT_MODEL, "gemma3:1b", "qwen2.5:1.5b", DEFAULT_MODEL])
+        history = (await self.client.get("/messages", headers=self.headers)).json()["messages"]
+        self.assertEqual(len(history), len(choices) * 2)
+        self.assertEqual([m["role"] for m in history], ["user", "assistant"] * 4)
+    async def test_verified_switch_preserves_history_and_failed_switch_preserves_selection(self):
+        from backend.llm.models import DEFAULT_MODEL
+        from backend.llm.provider import ProviderError
+        await self.client.post("/chat", headers=self.headers, json={"text": "synthetic continuity fact"})
+        before = (await self.client.get("/messages", headers=self.headers)).json()
+        with patch("backend.api.app.require_installed", AsyncMock()) as verify:
+            response = await self.client.post("/preferences", headers=self.headers, json={"model": "gemma3:1b"})
+            self.assertEqual(response.status_code, 200)
+            verify.assert_awaited_once_with("gemma3:1b")
+        with patch("backend.api.app.require_installed", AsyncMock(side_effect=ProviderError("Missing", "MODEL_NOT_INSTALLED"))):
+            failed = await self.client.post("/preferences", headers=self.headers, json={"model": DEFAULT_MODEL})
+            self.assertEqual(failed.status_code, 409)
+        self.assertEqual((await self.client.get("/preferences", headers=self.headers)).json()["model"], "gemma3:1b")
+        self.assertEqual((await self.client.get("/messages", headers=self.headers)).json(), before)
+        with patch("backend.api.app.require_installed", AsyncMock()):
+            await self.client.post("/preferences", headers=self.headers, json={"model": DEFAULT_MODEL})
+        self.assertEqual((await self.client.get("/messages", headers=self.headers)).json(), before)
+
+    async def test_explicit_unload_is_authenticated_scoped_and_does_not_delete_history(self):
+        from backend.llm.models import DEFAULT_MODEL
+        with patch("backend.api.app.unload_model", AsyncMock()) as unload:
+            forbidden = await self.client.post("/model-unload", json={"model": DEFAULT_MODEL})
+            self.assertEqual(forbidden.status_code, 401)
+            invalid = await self.client.post("/model-unload", headers=self.headers,
+                                             json={"model": "remote:cloud"})
+            self.assertEqual(invalid.status_code, 422)
+            response = await self.client.post("/model-unload", headers=self.headers, json={"model": DEFAULT_MODEL})
+            self.assertEqual(response.status_code, 200)
+            unload.assert_awaited_once_with(DEFAULT_MODEL)
     async def asyncSetUp(self):
         import httpx
 

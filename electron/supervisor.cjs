@@ -1,9 +1,10 @@
 const { spawn } = require('node:child_process');
 const { randomBytes } = require('node:crypto');
 const { requestLocal } = require('./http.cjs');
+const { backendStage } = require('./diagnostics.cjs');
 
 class BackendSupervisor {
-  /** @param {{command:string,args:string[],cwd:string,dataDir?:string,timeoutMs?:number}} options */
+  /** @param {{command:string,args:string[],cwd:string,dataDir?:string,timeoutMs?:number,onStage?:(event:{stage:string,at:string})=>void}} options */
   constructor(options) {
     this.options = options;
     /** @type {import('node:child_process').ChildProcessWithoutNullStreams | null} */
@@ -35,11 +36,23 @@ class BackendSupervisor {
         cwd: this.options.cwd, windowsHide: true, shell: false,
         stdio: ['pipe', 'pipe', 'pipe'],
         env: { ...process.env, PYTHONUNBUFFERED: '1', PYTHONUTF8: '1',
-          HF_HUB_OFFLINE: '1', TRANSFORMERS_OFFLINE: '1', DO_NOT_TRACK: '1' },
+          HF_HUB_OFFLINE: '1', TRANSFORMERS_OFFLINE: '1', DO_NOT_TRACK: '1',
+          MIKA_DIAGNOSTICS: this.options.onStage ? '1' : '0' },
       });
       this.child = child;
       child.stdin.on('error', () => {});
-      child.stderr.resume(); // Never forward possible user data/credentials into UI/logs.
+      // Never forward arbitrary stderr. Long/invalid/private lines are discarded.
+      let diagnosticBuffer = '';
+      child.stderr.on('data', chunk => {
+        diagnosticBuffer += chunk.toString('utf8');
+        if (diagnosticBuffer.length > 8192) { diagnosticBuffer = ''; return; }
+        let index;
+        while ((index = diagnosticBuffer.indexOf('\n')) >= 0) {
+          const event = backendStage(diagnosticBuffer.slice(0, index).trim());
+          diagnosticBuffer = diagnosticBuffer.slice(index + 1);
+          if (event) this.options.onStage?.(event);
+        }
+      });
       child.once('exit', () => {
         if (this.child === child) {
           this.child = null;
@@ -90,7 +103,9 @@ class BackendSupervisor {
         child.once('exit', onExit);
         child.stdin.write(JSON.stringify({ token: this.token, dataDir: this.options.dataDir }) + '\n');
       });
-      const health = await this.request('/health');
+      // This private handshake runs while status=starting; public requests must
+      // wait for ready instead of receiving port=0/empty-token security errors.
+      const health = await requestLocal(this.port, this.token, '/health');
       if (health.service !== 'mika-assistant' || health.protocol !== 1 ||
           health.status !== 'ok' || health.offline !== true || !this.child) {
         throw new Error('Backend health handshake failed');
@@ -104,9 +119,12 @@ class BackendSupervisor {
     }
   }
 
-  /** @param {string} route */
-  request(route) {
-    return requestLocal(this.port, this.token, route);
+  /** @param {string} route @param {object|null} [body] */
+  request(route, body = null) {
+    if (this.status !== 'ready') return Promise.reject(Object.assign(
+      new Error(this.error || 'Local backend is not ready. Check Python setup and choose Retry backend.'),
+      { code: 'BACKEND_NOT_READY' }));
+    return requestLocal(this.port, this.token, route, body);
   }
 
   async stop() {

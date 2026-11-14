@@ -4,13 +4,24 @@ const path = require('node:path');
 const fs = require('node:fs');
 const os = require('node:os');
 const { streamChat, validateChat } = require('./chat.cjs');
-const { requestLocal } = require('./http.cjs');
 const { BackendSupervisor } = require('./supervisor.cjs');
+const { developmentPython } = require('./python-runtime.cjs');
+const { memoryAdmission } = require('./admission.cjs');
+const { createPresentation } = require('./presentation.cjs');
+const { ignoreOverlayMouse } = require('./overlay-input.cjs');
 const { recoverBounds } = require('./bounds.cjs');
 const { trustedDocument, allowedResource } = require('./policy.cjs');
 
 const root = path.resolve(__dirname, '..');
 const dev = !app.isPackaged && process.env.MIKA_DEV === '1';
+// Development/smoke diagnostics contain lifecycle facts only: no credentials,
+// paths, conversation text or user data. They do not change quit behavior.
+/** @param {string} event @param {Record<string, string | number | boolean>} [details] */
+function lifecycle(event, details = {}) {
+  if (!app.isPackaged && (dev || process.env.MIKA_SMOKE_TEST === '1'))
+    console.log('[mika:lifecycle] ' + JSON.stringify({ at: new Date().toISOString(), event, ...details }));
+}
+lifecycle('main-start', { dev, smoke: process.env.MIKA_SMOKE_TEST === '1', electron: process.versions.electron });
 if (!app.isPackaged && process.env.MIKA_DATA_DIR) app.setPath('userData', path.resolve(process.env.MIKA_DATA_DIR));
 const dataDir = app.getPath('userData');
 const files = [path.join(root, 'dist/index.html'), path.join(root, 'dist/overlay.html'),
@@ -33,10 +44,23 @@ let writeTimer;
 /** @type {AbortController | null} */
 let activeChat = null;
 let chatSequence = 0;
+let interactiveRegion = false;
+/** @param {string} channel @param {unknown} value */
+function broadcast(channel, value) {
+  for (const win of [overlay, panel]) {
+    if (win && !win.isDestroyed() && !win.webContents.isDestroyed()) win.webContents.send(channel, value);
+  }
+}
+const presentation = createPresentation(value => broadcast('mika:presentation', value));
+function applyOverlayInput() {
+  overlay?.setIgnoreMouseEvents(ignoreOverlayMouse(clickThrough, interactiveRegion), { forward: true });
+}
 const backend = new BackendSupervisor({
   command: app.isPackaged ? path.join(process.resourcesPath, 'backend/mika-backend.exe')
-    : process.env.MIKA_PYTHON || path.join(root, '.venv/Scripts/python.exe'),
+    : developmentPython(root).command,
   args: app.isPackaged ? [] : ['-m', 'backend.bootstrap'], cwd: root, dataDir,
+  onStage: !app.isPackaged && (dev || process.env.MIKA_SMOKE_TEST === '1') ?
+    event => lifecycle('backend-stage', { stage: event.stage, backendAt: event.at }) : undefined,
 });
 
 function settingsPath() { return path.join(dataDir, 'desktop.json'); }
@@ -59,6 +83,11 @@ function status() {
 }
 /** @param {import('electron').BrowserWindow} win */
 function secureWindow(win) {
+  const name = win === overlay ? 'overlay' : 'panel';
+  win.on('show', () => lifecycle('window-shown', { window: name }));
+  win.on('hide', () => lifecycle('window-hidden', { window: name }));
+  win.on('closed', () => lifecycle('window-closed', { window: name }));
+  win.webContents.on('did-finish-load', () => lifecycle('renderer-loaded', { window: name }));
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', (event, url) => {
     if (!trustedDocument(url, files, dev)) event.preventDefault();
@@ -83,7 +112,9 @@ async function showPanel() {
   });
   const current = panel;
   current.setMenu(null);
-  current.on('close', event => { if (!quitting) { event.preventDefault(); current.hide(); } });
+  current.on('close', event => { if (!quitting) {
+    lifecycle('panel-close-hides'); event.preventDefault(); current.hide();
+  } });
   await loadWindow(current, false);
   current.show();
 }
@@ -94,27 +125,27 @@ function recover() {
 }
 function resetPosition() {
   if (!overlay) return;
-  overlay.setIgnoreMouseEvents(false);
   clickThrough = false;
+  applyOverlayInput();
   overlay.setBounds(recoverBounds(null, [screen.getPrimaryDisplay().workArea]));
   overlay.show(); shown = true; persist(); rebuildTray();
 }
 function rebuildTray() {
   tray?.setContextMenu(Menu.buildFromTemplate([
     { label: shown ? 'Hide companion' : 'Show companion', click: () => {
+      lifecycle('overlay-toggle', { source: 'tray' });
       shown = !shown; if (shown) overlay?.show(); else overlay?.hide(); rebuildTray(); } },
     { label: 'Always on top', type: 'checkbox', checked: topmost, click: item => {
       topmost = item.checked; overlay?.setAlwaysOnTop(topmost); persist(); } },
     { label: 'Click through (tray to recover)', type: 'checkbox', checked: clickThrough,
-      click: item => { clickThrough = item.checked; overlay?.setIgnoreMouseEvents(clickThrough,
-        { forward: true }); } },
+      click: item => { clickThrough = item.checked; applyOverlayInput(); } },
     { type: 'separator' },
     { label: 'Microphone: off — voice setup pending', enabled: false },
     { label: 'Push to talk — voice setup pending', enabled: false },
     { label: 'Reset position / disable click through', click: resetPosition },
     { label: 'Open settings and diagnostics', click: () => { void showPanel(); } },
     { type: 'separator' },
-    { label: 'Quit Mika', click: () => app.quit() },
+    { label: 'Quit Mika', click: () => { lifecycle('quit-request', { source: 'tray' }); app.quit(); } },
   ]));
 }
 /** @param {import('electron').IpcMainInvokeEvent} event */
@@ -126,16 +157,27 @@ function verifySender(event) {
 }
 async function startBackend() {
   lastHealth = null;
+  lifecycle('backend-starting', { pythonSource: app.isPackaged ? 'packaged' : developmentPython(root).source });
   try { await backend.start(); lastHealth = await backend.request('/health'); }
   catch { /* Sanitized actionable error is in backend.snapshot(). */ }
+  lifecycle(backend.status === 'ready' ? 'backend-ready' : 'backend-start-failed', { status: backend.status });
   return status();
 }
 function installIPC() {
-  ipcMain.handle('mika:preferences', (event, change) => {
+  ipcMain.handle('mika:preferences', async (event, change) => {
     verifySender(event);
     if (change !== undefined && (!change || typeof change !== 'object' || Array.isArray(change)))
       throw new Error('Invalid preference change');
-    return requestLocal(backend.port, backend.token, '/preferences', change ?? null);
+    const result = await backend.request('/preferences', change ?? null);
+    if (change !== undefined) broadcast('mika:preferences-changed', null);
+    return result;
+  });
+  ipcMain.handle('mika:presentation', event => { verifySender(event); return presentation.snapshot(); });
+  ipcMain.handle('mika:overlay-interactive', (event, interactive) => {
+    verifySender(event);
+    if (event.sender !== overlay?.webContents || typeof interactive !== 'boolean')
+      throw new Error('Invalid overlay interaction');
+    interactiveRegion = interactive; applyOverlayInput();
   });
   ipcMain.handle('mika:readiness', async event => {
     verifySender(event);
@@ -148,34 +190,52 @@ function installIPC() {
     catch { return { hardware, engines, ollama: { available: false, models: [],
       message: 'Start the local backend before checking Ollama.' } }; }
   });
+  ipcMain.handle('mika:model-unload', (event, model) => {
+    verifySender(event);
+    if (activeChat) throw new Error('Stop the active reply before unloading a model.');
+    validateChat({ text: 'validate model', model, language: 'auto' });
+    return backend.request('/model-unload', { model });
+  });
   ipcMain.handle('mika:chat-start', (event, input) => {
     verifySender(event);
     try {
       const message = validateChat(input);
       if (backend.status !== 'ready') throw new Error('Start the local backend first.');
-      const requiredGiB = message.model === 'qwen3.5:9b' ? 10 : message.model === 'qwen3.5:4b' ? 6 : 2;
-      if (os.freemem() < requiredGiB * 2 ** 30)
-        throw new Error(`Low available RAM. Free at least ${requiredGiB} GiB before starting this model.`);
+      const freeBytes = os.freemem();
+      const admission = memoryAdmission(message.model, freeBytes);
+      lifecycle('chat-memory-admission', { allowed: admission.allowed,
+        freeMiB: Math.floor(freeBytes / 2 ** 20), requiredGiB: admission.requiredGiB ?? 0 });
+      if (!admission.allowed) throw new Error(admission.reason);
       activeChat?.abort();
       const controller = new AbortController(); activeChat = controller;
       const sequence = ++chatSequence;
+      presentation.start(sequence);
+      lifecycle('chat-admitted', { sequence });
+      let receivedText = false;
       /** @param {Record<string, unknown>} payload */
       const publish = payload => {
+        if (sequence === chatSequence) presentation.consume(sequence, payload);
+        if (payload.type === 'delta' && !receivedText) {
+          receivedText = true; lifecycle('chat-first-delta', { sequence });
+        } else if (payload.type === 'done' || payload.type === 'error')
+          lifecycle('chat-terminal', { sequence, kind: String(payload.type), code: typeof payload.code === 'string' ? payload.code : 'none' });
         if (sequence === chatSequence && !event.sender.isDestroyed())
           event.sender.send('mika:chat-event', { ...payload, sequence });
       };
       void streamChat(backend.port, backend.token, message, controller.signal, publish)
         .catch(() => { if (!controller.signal.aborted)
-          publish({ type: 'error', state: 'ERROR', message: 'Local conversation connection failed. Open diagnostics.' }); })
+          publish({ type: 'error', state: 'ERROR', code: 'STREAM_TRANSPORT_ERROR', message: 'Local conversation connection failed. Open diagnostics.' }); })
         .finally(() => { if (sequence === chatSequence) activeChat = null; });
       return { started: true, sequence };
     } catch (error) {
+      presentation.reject(error instanceof Error ? error.message : 'Could not start the local conversation.');
       return { started: false, error: error instanceof Error ? error.message : 'Could not start the local conversation.' };
     }
   });
   ipcMain.handle('mika:chat-stop', event => {
-    verifySender(event); activeChat?.abort(); activeChat = null; ++chatSequence;
-    event.sender.send('mika:chat-event', { type: 'state', state: 'INTERRUPTED', sequence: chatSequence });
+    verifySender(event); activeChat?.abort(); activeChat = null; presentation.interrupt();
+    broadcast('mika:chat-event', { type: 'state', state: 'INTERRUPTED', sequence: chatSequence });
+    ++chatSequence;
   });
   for (const [channel, route] of [['mika:messages', '/messages'], ['mika:memories', '/memories']]) {
     ipcMain.handle(channel, event => { verifySender(event); return backend.request(route); });
@@ -189,7 +249,7 @@ function installIPC() {
         (change.operation !== 'remember' && (typeof change.id !== 'string' || change.id.length !== 36))) {
       throw new Error('Invalid explicit memory change');
     }
-    return requestLocal(backend.port, backend.token, '/memory', change);
+    return backend.request('/memory', change);
   });
   ipcMain.handle('mika:memory-export', async event => {
     verifySender(event);
@@ -200,14 +260,14 @@ function installIPC() {
     await fs.promises.writeFile(target.filePath, JSON.stringify(content, null, 2), 'utf8');
     return { saved: true };
   });
-  ipcMain.handle('mika:history-clear', event => {
+  ipcMain.handle('mika:history-clear', async event => {
     verifySender(event);
     if (activeChat) throw new Error('Stop the active reply before deleting history.');
-    return requestLocal(backend.port, backend.token, '/history-clear', {});
+    const result = await backend.request('/history-clear', {}); presentation.clear(); return result;
   });
   ipcMain.handle('mika:status', event => { verifySender(event); return status(); });
   ipcMain.handle('mika:retry', async event => {
-    verifySender(event); activeChat?.abort(); activeChat = null; ++chatSequence;
+    verifySender(event); activeChat?.abort(); activeChat = null; presentation.interrupt(); ++chatSequence;
     await backend.stop(); return startBackend();
   });
   ipcMain.handle('mika:diagnostics', async event => {
@@ -218,6 +278,7 @@ function installIPC() {
   });
   ipcMain.handle('mika:desktop', (event, action, value) => {
     verifySender(event);
+    if (['settings', 'show', 'hide'].includes(action)) lifecycle('desktop-action', { action, source: 'renderer' });
     switch (action) {
       case 'settings': void showPanel(); break;
       case 'hide': overlay?.hide(); shown = false; break;
@@ -228,7 +289,7 @@ function installIPC() {
         topmost = value; overlay?.setAlwaysOnTop(value); persist(); break;
       case 'clickThrough':
         if (typeof value !== 'boolean') throw new Error('Expected boolean');
-        clickThrough = value; overlay?.setIgnoreMouseEvents(value, { forward: true }); break;
+        clickThrough = value; applyOverlayInput(); break;
       case 'scale': {
         if (typeof value !== 'number' || !Number.isFinite(value) || value < 0.6 || value > 1.6)
           throw new Error('Scale must be between 0.6 and 1.6');
@@ -236,17 +297,20 @@ function installIPC() {
         overlay?.setBounds(recoverBounds(bounds, screen.getAllDisplays().map(d => d.workArea)));
         persist(); break;
       }
-      case 'quit': app.quit(); break;
+      case 'quit': lifecycle('quit-request', { source: 'renderer-control' }); app.quit(); break;
       default: throw new Error('Unknown desktop action');
     }
     rebuildTray(); return status();
   });
 }
 
-if (!app.requestSingleInstanceLock()) app.quit();
+if (!app.requestSingleInstanceLock()) {
+  lifecycle('single-instance-forwarded'); app.quit();
+}
 else {
-  app.on('second-instance', () => { void showPanel(); });
+  app.on('second-instance', () => { lifecycle('existing-instance-activated'); void showPanel(); });
   app.whenReady().then(async () => {
+    lifecycle('app-ready');
     session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));
     session.defaultSession.setPermissionCheckHandler(() => false);
     session.defaultSession.on('will-download', event => event.preventDefault());
@@ -278,8 +342,11 @@ else {
     await startBackend();
     if (closing || quitting) return;
     await loadWindow(overlay, true);
+    applyOverlayInput();
     overlay.show();
-    await showPanel();
+    // Normal operation is avatar-first; the panel is opened explicitly. Smoke
+    // still opens both real Vue windows to verify their security and integration.
+    if (process.env.MIKA_SMOKE_TEST === '1') await showPanel();
     if (!app.isPackaged && process.env.MIKA_SMOKE_TEST === '1') {
       if (!panel) throw new Error('Mika panel did not initialize');
       const currentPanel = panel;
@@ -300,6 +367,10 @@ else {
         nativeWindows: { overlay: await windowProof(overlay), panel: await windowProof(currentPanel) },
         // Main-only local test artifact; no token and no renderer API exposure.
         supervision: { backendPid: backend.child?.pid ?? null, backendPort: backend.port } };
+      report.presentationHost = await overlay.webContents.executeJavaScript(`({
+        mounted: Boolean(document.querySelector('[data-presentation-version="1"]')),
+        bridge: typeof window.mika.presentation === 'function' && typeof window.mika.onPresentationEvent === 'function'
+      })`);
       report.ipc = await overlay.webContents.executeJavaScript(`(async () => {
         const before = await window.mika.status();
         const changed = await window.mika.desktop('topmost', !before.desktop.topmost);
@@ -315,10 +386,27 @@ else {
             before.health?.service === 'mika-assistant',
           secretExposed: /token|port|pid/i.test(JSON.stringify(Object.keys(before))) };
       })()`);
+      report.bubbleLayout = await require('./bubble-verification.cjs').verifyBubble(overlay, presentation, dataDir);
+      if (process.env.MIKA_REAL_CHAT_TEST === '1') {
+        lifecycle('real-chat-verification-start');
+        report.realChat = await require('./real-chat-test.cjs').verifyRealChat(currentPanel);
+        report.overlayCaption = await overlay.webContents.executeJavaScript(`(async () => {
+          const current = await window.mika.presentation();
+          const text = document.querySelector('.bubble-text')?.textContent ?? '';
+          return { phase: current.phase, sequence: current.sequence, audioActive: current.audioActive,
+            nonempty: Boolean(text), matches: text === current.text };
+        })()`);
+        // Real-chat verification restarts the backend; cleanup must check its new
+        // child/listener, rather than proving only that the old process is gone.
+        report.supervision = { backendPid: backend.child?.pid ?? null, backendPort: backend.port };
+      }
       fs.mkdirSync(dataDir, { recursive: true });
       const image = await currentPanel.webContents.capturePage();
       fs.writeFileSync(path.join(dataDir, 'desktop-preview.png'), image.toPNG());
+      const overlayImage = await overlay.webContents.capturePage();
+      fs.writeFileSync(path.join(dataDir, 'overlay-preview.png'), overlayImage.toPNG());
       fs.writeFileSync(path.join(dataDir, 'desktop-smoke.json'), JSON.stringify(report, null, 2));
+      lifecycle('quit-request', { source: 'automated-smoke' });
       app.quit();
     }
   }).catch(async () => {
@@ -330,9 +418,14 @@ else {
 app.on('activate', () => { void showPanel(); });
 app.on('window-all-closed', () => { if (quitting) app.quit(); });
 app.on('before-quit', event => {
+  lifecycle('before-quit', { quitting, closing });
   if (quitting) return;
   event.preventDefault();
   if (closing) return;
   closing = true; activeChat?.abort(); activeChat = null; ++chatSequence; persist(); clearTimeout(writeTimer); globalShortcut.unregisterAll();
-  void backend.stop().finally(() => { quitting = true; tray?.destroy(); app.quit(); });
+  void backend.stop().finally(() => {
+    lifecycle('backend-cleanup-finished', { stopped: backend.status === 'stopped' });
+    quitting = true; tray?.destroy(); app.quit();
+  });
 });
+app.on('quit', (_event, exitCode) => lifecycle('app-quit', { exitCode }));

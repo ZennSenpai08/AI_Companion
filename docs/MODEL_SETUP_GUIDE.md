@@ -1,5 +1,16 @@
 # Model setup guide — provisional
 
+The current executable [real text verification procedure](REAL_OLLAMA_TEST.md) provides
+read-only npm run ollama:check, explicit one-model preparation and npm run test:chat-real.
+Current result is BLOCKED: no local service/model confirmed and insufficient free RAM.
+No model installation or actual inference is claimed. The protected existing adapter is
+reused, and ordinary Mika startup never downloads weights or enables cloud fallback.
+
+The current [integration-readiness review](OLLAMA_INTEGRATION_READINESS.md) maps the already
+implemented text modules, verifies official candidate sizes and defines the next real-model
+acceptance. This task performs preparation only; do not execute model downloads as part
+of desktop verification. Current free RAM is below even the Lite application guard.
+
 No model downloads are part of setup scripts. Close memory-heavy apps and verify available
 RAM/disk with doctor before provisioning. No model has been downloaded or benchmarked here.
 

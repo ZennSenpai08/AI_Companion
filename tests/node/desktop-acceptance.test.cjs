@@ -6,6 +6,8 @@ function evidence() {
   const win = { visible: true, sandbox: true, contextIsolation: true,
     nodeIntegration: false, rendererSandboxed: true };
   return { build: 'vue', windows: 2, renderer: frame, panelRenderer: frame,
+    presentationHost: { mounted: true, bridge: true },
+    bubbleLayout: { passed: true },
     nativeWindows: { overlay: win, panel: win }, backend: { status: 'ready' },
     health: { service: 'mika-assistant', status: 'ok', offline: true, microphone: 'off' },
     ipc: { backendReachable: true, topmostToggled: true, clickThroughRecovered: true,
@@ -28,4 +30,6 @@ test('missing evidence and unsafe renderer preferences never pass desktop accept
   assert.ok(Object.values(assessDesktopReport(null)).every(value => value === false));
   const unsafe = evidence(); unsafe.nativeWindows.panel.nodeIntegration = true;
   assert.equal(assessDesktopReport(unsafe).panelVisibleAndSecure, false);
+  const missingHost = evidence(); missingHost.presentationHost.mounted = false;
+  assert.equal(assessDesktopReport(missingHost).responsePresentationHost, false);
 });

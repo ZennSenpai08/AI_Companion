@@ -3,6 +3,8 @@
 /**
  * @typedef {{build?:string,windows?:number,renderer?:FrameProof,panelRenderer?:FrameProof,
  * nativeWindows?:{overlay?:WindowProof,panel?:WindowProof},backend?:{status?:string},
+ * presentationHost?:{mounted?:boolean,bridge?:boolean},
+ * bubbleLayout?:{passed?:boolean},
  * health?:{service?:string,status?:string,offline?:boolean,microphone?:string},
  * ipc?:{topmostToggled?:boolean,clickThroughRecovered?:boolean,invalidActionRejected?:boolean,
  * secretExposed?:boolean,backendReachable?:boolean}}} DesktopProof
@@ -21,6 +23,8 @@ function assessDesktopReport(report) {
     twoNativeWindows: typeof report?.windows === 'number' && report.windows >= 2,
     overlayVueAndPreload: frameReady(report?.renderer),
     panelVueAndPreload: frameReady(report?.panelRenderer),
+    responsePresentationHost: report?.presentationHost?.mounted === true && report.presentationHost.bridge === true,
+    bubbleLayoutVerified: report?.bubbleLayout?.passed === true,
     overlayVisibleAndSecure: secureWindow(report?.nativeWindows?.overlay),
     panelVisibleAndSecure: secureWindow(report?.nativeWindows?.panel),
     backendHealthy: report?.backend?.status === 'ready' && report.health?.service === 'mika-assistant' &&

@@ -18,4 +18,6 @@ if ($LASTEXITCODE -ne 0) { throw 'Virtual environment creation failed.' }
 if ($LASTEXITCODE -ne 0) { throw 'Python dependency installation failed. No runtime success claimed.' }
 & npm install --cache .cache/npm --no-audit --no-fund
 if ($LASTEXITCODE -ne 0) { throw 'Desktop dependency installation failed.' }
+& npm run electron:install
+if ($LASTEXITCODE -ne 0) { throw 'Electron binary preparation failed. Run npm run electron:install in ordinary PowerShell.' }
 Write-Host 'Foundation dependencies installed. No model, voice or avatar has been downloaded.'

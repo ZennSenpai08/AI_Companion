@@ -1,6 +1,57 @@
+## 2026-11-14 — Native bubble acceptance preparation
+
+- Add smoke-only DOM/geometry/contrast/streaming/movement checks at two window sizes,
+  failure cleanup and regression tests; require evidence in desktop acceptance.
+- Record absent Qwen2.5, actual low-RAM rejection and authenticated resident-model unload.
+- No model downloads, changed defaults, security changes or native visual success claims.
+
+## 2026-11-14 — English response policy and floating captions
+
+- Preserve mixed-language input while directing protected persona replies to English.
+- Add bounded editable expression hints, installed-only Qwen2.5 1.5B policy and real A/B harness.
+- Add main-owned streaming response bubble, optional panel startup, timing and cancellation.
+- Record real 0.8B quality failures and legitimate RAM rejection; no new weights/audio/Live2D.
+
 # Changelog
 
+## 2026-11-14 — safe local model selection and memory diagnostics
+
+- Central compatibility/default/admission policy; installed-only selectors and local GGUF
+  verification before switching/chat. No auto-download or silent model substitution.
+- Explicit authenticated model unload, active-generation protection, saved history intact.
+- Retained safety thresholds; RAM error includes actual availability. Diagnosed saved
+  legitimate shortages and benchmarked cold/warm inference/unload with real 0.8B.
+- Fixed complete-turn context truncation; added guarded comparative quality diagnostics.
+- 62 Node/65 Python passes; type/lint and native-loader Vue build pass. New native controls
+  need ordinary-Windows QA. Filipino/Taglish model quality remains unacceptable.
+
 ## Unreleased
+
+- Unified normal/smoke Python selection and ready-gated backend reads/writes, preserving
+  loopback/auth validation and adding safe field-specific request errors.
+- Added sanitized pipeline timestamps/codes and native evidence stages; interrupted or
+  replaced tests now retain their failed turn instead of hiding behind a generic timeout.
+- Verified real installed-model backend output, latency and SQLite restart; recorded weak
+  Taglish/context quality and pending native Vue acceptance. 59 Node/56 Python tests pass.
+
+- Added read-only Ollama admission and an explicit real Vue/model acceptance mode with
+  isolated data, completion measurements, restart/cancellation checks and resource capture.
+- Fixed HTTP read-timeout reporting and prevented stale/invalid metric values or history
+  storage. Added five Python and two Node regressions; totals 55/50 pass respectively.
+- Documented actual unavailable-model/low-RAM blockers and exact normal-Windows procedure;
+  no real inference, model benchmark or offline acceptance claimed.
+
+- Added development/smoke lifecycle console facts and an inherited-smoke warning without
+  changing close/quit semantics. Audited desktop controls and existing text architecture.
+- Recorded current Windows actual-app acceptance, fresh 48 Node/50 backend passes,
+  remaining manual gates and a preparation-only Ollama plan with verified model sources.
+
+- Added explicit pinned Electron binary installation and metadata-only runtime discovery
+  for development/desktop tests, honoring platform and explicit alternate dist settings.
+- Distinguished missing binary/native execution/Vite failures; preflight prevents an
+  orphan Vite server when Electron is absent. Eight runtime regressions pass.
+- Inspected saved actual Mika Vue/security/IPC/backend/clean-exit evidence; recorded
+  48 Node and 50 backend passes separately from current restricted-agent launch failures.
 
 - Accepted the user's visible native startup/security pass; separated interrupted shutdown
   from startup in future probe reports without rewriting original artifacts.

@@ -1,6 +1,6 @@
 const http = require('node:http');
 const { TextDecoder } = require('node:util');
-const MODELS = ['qwen3.5:0.8b', 'qwen3.5:4b', 'qwen3.5:9b'];
+const MODELS = Object.keys(require('../backend/llm/model_policy.json').models);
 const STATES = ['IDLE', 'LISTENING', 'TRANSCRIBING', 'THINKING', 'SPEAKING', 'INTERRUPTED', 'ERROR'];
 /** @param {unknown} input */
 function validateChat(input) {

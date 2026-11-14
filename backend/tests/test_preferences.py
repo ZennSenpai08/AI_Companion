@@ -7,6 +7,17 @@ from backend.memory.sqlite_store import MemoryStore
 
 
 class PreferenceTests(unittest.TestCase):
+    def test_bubble_timing_is_bounded_and_persists_without_audio_permission(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "settings.sqlite"
+            preferences = Preferences(MemoryStore(path))
+            for timing in (0, 3000, 12000, 120000):
+                preferences.update({"bubble_hold_ms": timing})
+                self.assertEqual(Preferences(MemoryStore(path)).read()["bubble_hold_ms"], timing)
+            for timing in (-1, 2000, 120001, 3000.0, True, "12000", None):
+                with self.assertRaises(ValueError):
+                    preferences.update({"bubble_hold_ms": timing})
+            self.assertNotIn("microphone_enabled", preferences.read())
     def test_defaults_updates_restart_and_history_delete_keep_preferences(self):
         with tempfile.TemporaryDirectory() as directory:
             filename = Path(directory) / "assistant.sqlite"

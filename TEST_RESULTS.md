@@ -1,4 +1,255 @@
-# Current Vue-unblock and shutdown reporting task — 2026-11-14
+# Latest: Qwen2.5 and bubble checks — 2026-11-14
+
+| Executed command/check | Actual result |
+|---|---|
+| git bundle verify / list-heads, 2f82c3f | PASS, complete history retained |
+| npm test with working MIKA_PYTHON | 69 PASS, 0 skipped/failed, 7.713 s |
+| .venv-runtime/Scripts/python.exe -m unittest discover -s backend/tests -v | 70 PASS, 0 skipped/failed, 13.320 s |
+| npm run typecheck; npm run lint:js | PASS |
+| npm run build | FAIL: agent esbuild directory access; preceding types passed |
+| node node_modules/vite/bin/vite.js build --configLoader native | PASS, 28 modules, 1.83 s |
+| Qwen2.5 readiness / bilingual evaluator | BLOCKED: absent weights, 2.635 GiB free below 3 GiB policy; no inference |
+| Qwen0.8 bilingual evaluator | One real English greeting; next case refused at 1.621 GiB free; incomplete |
+| npm run test:chat-api -- --verify-unload | BLOCKED at low-memory preflight; no turns |
+| Separate authenticated model-unload / cleanup check | PASS with a resident real Qwen0.8 model, catalog empty afterward; empty test history unchanged, backend stopped |
+| npm run test:desktop; npm run test:chat-real | BLOCKED before app-ready by restricted-agent runtime ACL check; no permission changes |
+| Browser layout fixture attempt | BLOCKED: browser access host unavailable; temporary local server stopped/listener closed |
+
+Three new Node tests validate geometry/contrast rejection and smoke-helper cleanup with
+fixtures. They are **not executed native layout evidence**. New helper is integrated into
+ordinary-Windows smoke, captures two screenshots and requires real DOM/bounds evidence;
+manual compositing/drag/pass-through remains open. No English-only bilingual success rate
+or model-comparison winner was fabricated. Exact artifacts, outputs, measurements and
+commands: docs/QWEN25_BUBBLE_VERIFICATION.md; logs: test-artifacts/qwen25-bubble/checks.
+
+# Previous bilingual English replies and presentation verification — 2026-11-14
+
+| Executed check | Actual result |
+|---|---|
+| 529de0d bundle verify/list-heads | PASS, complete history preserved |
+| npm test, MIKA_PYTHON=.venv-runtime/Scripts/python.exe | 66 PASS, zero skips/failures; final run 7.523 s |
+| Python unittest discovery | Final 70 PASS, zero skips/failures, 13.135 s. An intermediate expanded fixture failed its obsolete count (6 vs 8); corrected to two messages per selected model and rerun |
+| .venv-runtime/Scripts/python.exe scripts/offline_smoke.py | 70 PASS, 12.439 s; zero unexpected external attempts in guarded Python test process only |
+| npm run typecheck / npm run lint:js | PASS, including final main/preload/report changes |
+| Python compileall backend + evaluator | PASS; Ruff remains unavailable |
+| npm run build | FAIL: agent esbuild cannot read parent directories/config; types passed |
+| Vite build --configLoader native | PASS, 28 modules, real production Vue assets, 2.61 s |
+| npm run test:desktop | BLOCKED: agent runtime ACL fatal before app-ready; no security changes |
+| npm run test:chat-real | Preflight passed, native execution BLOCKED at same restriction |
+| npm run test:chat-api -- --verify-unload | One real reply/presenter text match PASS; turn 2 rejected at 1.87 GiB RAM; overall FAIL, backend cleanup PASS, unload/restart not reached |
+| bilingual evaluator, qwen3.5:0.8b | Eight fresh Mika+glossary cases generated before low-RAM rejection; quality FAIL, not English-only reliable |
+| isolated direct Tagalog case | Completed real inference; broken mixed-language reply despite English-only system prompt, no Mika/glossary |
+| qwen2.5:1.5b / gemma3:1b / qwen3:1.7b readiness/evaluator | Each BLOCKED: MODEL_NOT_INSTALLED, zero inference/downloads |
+
+Command outputs are in `test-artifacts/bilingual/checks`. Synthetic real outputs, resource
+snapshots and exact run IDs are documented in `docs/BILINGUAL_ENGLISH_RESPONSES.md`.
+New regression coverage includes bounded relevant slang retrieval, malformed glossary
+fallback, protected English policy across all legacy input hints, prompt size/hostile-data
+boundaries, installed-policy Qwen2.5 continuity, persisted bubble timing, stale response
+cancellation, text/no-audio presentation and overlay input rules. These are unit/fixture
+tests, not model semantic success or physical desktop interaction.
+
+No fresh full multi-turn/restart/personality quality pass: resource rejection prevented
+those acceptance paths. Saved earlier normal-Windows native/real-model evidence is retained
+but does not verify this new bubble or English-only policy. No system-wide external-network
+block was applied; local endpoint-only inference is not full offline firewall certification.
+
+# Historical safe model switching and memory verification — 2026-11-14
+
+| Executed check | Actual result |
+|---|---|
+| aa0bb05 bundle verify/list-heads | PASS, complete history, preserved |
+| npm test with MIKA_PYTHON=.venv-runtime/Scripts/python.exe | 62 PASS, no failures/skips, 8.433 s |
+| .venv-runtime/Scripts/python.exe -m unittest discover -s backend/tests -v | 65 PASS, no failures/skips, 15.807 s |
+| npm run typecheck | PASS Vue/Electron/core; initial resolveJsonModule failure fixed |
+| npm run lint:js | PASS |
+| Python compileall backend + evaluator | PASS; Ruff not installed, not claimed |
+| npm run build | FAILED in agent, esbuild cannot read parent directories/config |
+| node node_modules/vite/bin/vite.js build --configLoader native | PASS, 22 modules, 1.41 s; config ESM __dirname issue repaired |
+| npm run test:desktop | BLOCKED in restricted agent, runtime ACL check before app-ready |
+| npm run test:chat-real | Preflight passed, native launch BLOCKED at same agent restriction |
+| npm run test:chat-api | PASS, five real Ollama turns, exact SQLite backend-restart restore, backend stopped |
+| npm run test:chat-api -- --verify-unload | PASS, installed preference save + real authenticated unload + unchanged history + restart/cleanup |
+| evaluator --stability-only | PASS transport/three-turn recall, real cancellation after delta and recovery; instruction/language quality not accepted |
+| evaluator --model gemma3:1b --stability-only | BLOCKED before inference, model not installed; no download |
+
+Logs are in test-artifacts/conversation-quality/checks. Full measurements and real synthetic
+outputs are linked in docs/MODEL_SWITCHING_AND_MEMORY.md. Direct/stock/conservative/official
+sampling comparisons reproduce Tagalog/Taglish failures without Mika; raw prompt replays
+match Mika outputs. No claim of model-quality improvement. All model-switch/Gemma fixtures
+are explicitly protocol/continuity tests, not Gemma inference. The latest real API trace is
+test-artifacts/chat-trace/2026-11-14T05-39-45-874Z-5186e000/result.json.
+
+Guard regression tests use simulated memory numbers: rejection below threshold, recovery
+on later observations and no warm bypass. Actual Windows saved RAM crossed below 2 GiB;
+fresh tests stayed above it. No artificial RAM exhaustion or weakened thresholds.
+The orphan-assistant context regression was first observed failing, then repaired/passed.
+
+Saved normal-Windows native real-chat evidence at 05:14 UTC remains PASS for transport,
+renderer security, SQLite restart, profile unchanged and no interrupted assistant storage.
+Fresh native UI switching/unload is not verified in this agent. Earlier results below are
+historical and superseded by this section where they describe unavailable models/runtime.
+
+---
+
+# Local-request and real-chat repair — 2026-11-14
+
+| Executed verification | Actual result |
+|---|---|
+| 04cf812 bundle verify | PASS, full-history ref preserved |
+| Actual Python inspection | .venv 3.9.13 lacks FastAPI/Uvicorn; .venv-runtime 3.10.11 has both |
+| Node suite with MIKA_PYTHON=.venv-runtime | 59/59 PASS, no skips/failures, 9.856 s |
+| .venv-runtime Python unittest suite | 56/56 PASS, no skips, 11.207 s |
+| Full Vue/Electron/core type checks | PASS; initial new trace-script annotations repaired before final checks |
+| JavaScript lint | PASS |
+| Focused request + failure-evidence regressions | PASS; includes real prepared-backend startup/read/write/auth/restart and failure-report fixtures |
+| npm run test:chat-api (twice) | PASS, genuine installed Ollama output and exact SQLite backend-restart restoration; no Vue/native claim |
+| npm run build | BLOCKED/exit 1: esbuild parent/config read denied in agent; log retained |
+| npm run test:desktop | BLOCKED/exit 2147483651: existing agent runtime ACL check before app-ready |
+| Updated npm run test:chat-real | Ordinary-Windows rebuild/retest pending; not attempted again after native prerequisite failed in agent |
+
+Logs: test-artifacts/request-repair/{node-tests.log,backend-tests.log,typecheck.log,
+lint.log,build.log}. Latest native regression: test-artifacts/electron-startup/
+mika-2026-11-14T04-50-27-948Z-b3903898/launch.json. No ACL/security change attempted.
+Normal-session native foundation PASS is preserved as separate saved/user evidence.
+
+Actual inference evidence: test-artifacts/chat-trace/2026-11-14T00-55-32-329Z-dca02aec/
+and 2026-11-14T01-03-20-079Z-ca765115/result.json. First cold delta 72.343 s (load 30.038 s,
+prompt eval 42.114 s). Second-run first delta 5.394 s, warm deltas 0.114–0.151 s; generation
+49.174–67.713 tokens/s in that run. Genuine output includes "I am Mika" but Taglish is
+unnatural and code-word recall/spelling inaccurate. Do not equate transport PASS with
+accepted language/persona quality. Complete actual outputs/metrics stay in these explicitly
+generated test artifacts. No fixture inference was injected into either acceptance run.
+
+Saved original failing native test inspected: 00:42 UTC run, submitted user rows but no
+assistant completion. Filtered Ollama HTTP log records client-closed 499 requests at
+08:43:06/08:44:05 local, 41.91/29.02 seconds. Both precede the 90-second provider deadline.
+The old runner ignored interruption and lost failed-stage evidence. The actor/cancellation
+cause is not established. Regression fixtures now prove interrupt/replacement terminates
+immediately with CHAT_INTERRUPTED/TEST_INTERFERED, preserving the attempted turn.
+
+New tests do not simulate model answers during real acceptance. VM/DOM failure fixtures
+are labeled as report-classification tests. Actual Vue/rendered model answers after the
+repair, full Electron restart and external-network-isolated behavior are NOT YET VERIFIED.
+See docs/LOCAL_REQUEST_CHAT_REPAIR.md for exact Windows commands and interpretation.
+
+---
+
+# Earlier real Ollama integration attempt — 2026-11-14
+
+| Executed check | Result |
+|---|---|
+| git bundle verify/list-heads f1dfce0 | PASS, complete-history checkpoint preserved |
+| npm run typecheck | Initially FAILED (runtime annotation after async preflight); fixed, full Vue/Electron/core recheck PASS |
+| npm run lint:js | PASS |
+| npm test with MIKA_PYTHON=.venv-runtime | 50/50 PASS, no failures/skips, 9.471 s |
+| .venv-runtime/Scripts/python.exe -m unittest discover -s backend/tests -v | 55/55 PASS, no skips, 14.938 s |
+| Focused metrics/conversation suite | 11/11 PASS, fixtures/protocol only |
+| Python Ruff | UNAVAILABLE: No module named ruff; not claimed passed |
+| npm run ollama:check | BLOCKED: no verified listener, ECONNREFUSED, model unavailable, low free RAM |
+| npm run test:chat-real | BLOCKED before Electron/inference, inferenceAttempted=false |
+| npm run build | FAILED in agent: existing esbuild parent-directory access denial |
+| npm run test:desktop | BLOCKED in agent at runtime ACL check, exit 2147483651; security unchanged |
+
+Actual real-model gate: test-artifacts/electron-startup/
+mika-2026-11-13T23-56-46-773Z-e5dd63ee/ollama-preflight.json. It records available=false,
+modelInferenceAttempted=false, modelDownloaded=false, 0.39 GiB free RAM and no listener.
+No real generated responses, language/personality scores, load time, TTFT, tokens/s or
+inference memory measurements exist. Ambient GPU readings are not a model benchmark.
+Latest read-only check in test-artifacts/ollama-integration/preflight.json at 00:05 UTC
+still records no listener/model and insufficient RAM (1.50 GiB free); no inference/pull.
+Rerun after readiness corrections is required; ordinary-Windows results were requested
+asynchronously but not assumed. Real offline acceptance remains NOT YET VERIFIED.
+
+Native regression artifact: mika-2026-11-13T23-59-47-522Z-6b9be1a2/launch.json. Runtime
+resolved, realChatRequested=false, main-start, then fatal before app-ready. This does not
+invalidate saved normal-Windows native acceptance or justify ACL changes.
+
+Full Node/backend/typecheck/lint/build logs: test-artifacts/ollama-integration/. New tests
+verify valid/invalid completion metrics, no stale metrics after failure, useful timeout
+classification, metrics excluded from stored history and loopback-only admission. Fixture
+token counts are explicitly not benchmark data. Existing tests verify real local API
+restart/persistence/cancellation using fixture inference, not an actual Ollama model.
+The new UI runner is executable/source checked; its DOM/language/cancellation/resource
+branches await a real model/native session. Backend restart is not full Electron restart.
+
+---
+
+# Earlier desktop foundation review — 2026-11-14
+
+| Evidence class | Executed check/result |
+|---|---|
+| Static | npm run typecheck PASS: full Vue/SFC, Electron/checkJs, renderer-core; yielded process completed exit 0 |
+| Static | npm run lint:js PASS |
+| Automated | npm test with MIKA_PYTHON=.venv-runtime: 48/48 PASS, no failures/skips, 11.331 s |
+| Automated | .venv-runtime/Scripts/python.exe -m unittest discover -s backend/tests -v: 50/50 PASS, no skips, 19.138 s |
+| Fresh build | npm run build exit 1: esbuild denied parent-directory read/config resolution; user's normal build success is a separate prior result |
+| Fresh native | npm run test:desktop resolves 45.3.0, logs main-start, exits 2147483651 at runtime ACL check before app-ready; BLOCKED in agent |
+| Saved current Windows | mika-2026-11-13T23-20-15-238Z-f5bce573: all ten actual Mika checks PASS, rendererStartup PASS, gracefulShutdown PASS |
+| Manual | Interactive dwell, settings X/reopen, physical click-through/topmost/drag, tray and restart bounds: NOT YET VERIFIED by agent/user confirmation in this task |
+| Read-only readiness | Ollama absent on current PATH; fixed-loopback installed_models unavailable; no model invocation or download |
+| Archive | git bundle verify/list-heads 26ad2b2 PASS, complete-history ref preserved |
+
+Fresh Node/backend/build outputs: test-artifacts/desktop-foundation/{node-tests.log,
+backend-tests.log,build.log}. Native artifact: test-artifacts/electron-startup/
+mika-2026-11-13T23-26-33-293Z-7b77eff0/launch.json. Its new lifecycle main-start is observed;
+later diagnostic events are source/type checked, not falsely claimed as a new visible run.
+No ACL changes, sandbox bypass, dependency update or model/speech/Live2D work.
+
+The current Windows saved actual-app result independently records two visible secure
+Vue/preload mounts, OS renderer sandbox, authenticated backend health, native IPC controls,
+zero Node exposure, exit 0/no signal/no timeout, backend process gone and listener closed.
+desktop.json contains actual saved bounds/topmost. This proves writing settings, not
+manual dragging or restart restoration. Its Unknown desktop action stderr is the expected
+permission-boundary rejection. The smoke source explicitly calls app.quit after capture.
+Code 0 is expected there; the interactive dev exit cause remains unknown from the single
+exit line. Tests using fixture inference do not demonstrate a real local model response.
+
+The only executable changes in this task are lifecycle console diagnostics and an inherited
+smoke-flag warning; shutdown behavior is preserved. No implementation-mirroring tests added.
+
+---
+
+# Earlier runtime recovery and actual Mika evidence — 2026-11-14
+
+Commands actually executed in this task:
+
+| Command/check | Result |
+|---|---|
+| git bundle verify / list-heads for a4a470a | PASS, complete history and exact ref |
+| npm run electron:check | PASS, native Electron 45.3.0 in package dist |
+| npm run electron:install | PASS, official pinned installer, already installed |
+| npm run typecheck | PASS, full Vue/SFC + Electron + renderer-core |
+| npm run lint:js | PASS |
+| npm test with MIKA_PYTHON=.venv-runtime | Final 48/48 PASS, zero failures/skips, 13.803 s; includes eight runtime regressions |
+| .venv-runtime/Scripts/python.exe -m unittest discover -s backend/tests -v | 50/50 PASS, no skips, 20.069 s |
+| npm run build | FAIL in agent: esbuild parent-directory access denied; user reports normal-session PASS, 22 Vite modules |
+| npm run dev | FAIL in agent with distinct Vite config error, exit 1; Electron not launched by dev |
+| vite build --configLoader runner (diagnostic only) | FAIL: existing config uses __dirname; no config/architecture change made |
+| npm run test:desktop | BLOCKED in agent after successful runtime resolution: native ACL fatal, exit 2147483651 |
+
+Latest agent native artifact: mika-2026-11-13T23-09-53-879Z-4fa48457/launch.json, under
+test-artifacts/electron-startup/. runtimeResolved=true, nativeSpawnError=null, no timeout;
+rendererStartup and gracefulShutdown are NOT VERIFIED. No permission modifications.
+Source command output: runtime-recovery/source-command-results.json. Node aggregate output:
+runtime-recovery/node-tests.log. Typecheck's yielded process subsequently completed exit 0.
+Python suite includes real loopback/backend tests and fixture model tests, not real inference.
+
+**Saved actual application acceptance: PASS** for the existing real run at
+test-artifacts/electron-startup/mika-2026-11-13T22-41-50-736Z-5c0ba0c6/. Inspected launch.json,
+desktop-smoke.json and desktop-preview.png. All ten actual-app checks are true: built Vue,
+two native windows, both Vue/preload mounts, both visible secure renderers, backend health,
+renderer IPC, native controls and permission boundary. Exit 0/no signal/no timeout,
+backend process gone and listener closed: gracefulShutdown=PASS. Screenshot actually shows
+the Mika Vue settings panel. The stderr Unknown desktop action is the intentionally denied
+permission test, not a startup failure. This saved run predates this task's launcher changes;
+it is not represented as a new agent-side or manually observed desktop run. New-launcher
+normal-session retest remains pending. Overlay alpha compositing/manual drag are not proven
+by the panel screenshot. No avatar/AI/voice acceptance is implied.
+
+---
+
+# Earlier Vue-unblock and shutdown reporting task — 2026-11-14
 
 Normal-session startup, secure renderer and visible native content are PASS, from saved
 visible-2026-11-13T21-27-41-283Z-36de18b7 plus user appearance confirmation. Its SIGTERM/

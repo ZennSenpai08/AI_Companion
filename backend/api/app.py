@@ -11,19 +11,26 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from backend.core.conversation import Conversation
+from backend.core.diagnostics import stage
 from backend.core.preferences import Preferences
 from backend.core.security import authorized, trusted_peer, valid_token
 from backend.llm.ollama import OllamaProvider
 from backend.llm.provider import ProviderError
-from backend.llm.readiness import installed_models
+from backend.llm.readiness import installed_models, require_installed, loaded_models, unload_model
+from backend.llm.models import DEFAULT_MODEL, validate_model
 from backend.memory.sqlite_store import MemoryStore
 
 
 class ChatRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     text: str = Field(min_length=1, max_length=4000)
-    model: Literal["qwen3.5:0.8b", "qwen3.5:4b", "qwen3.5:9b"] = "qwen3.5:0.8b"
+    model: str = DEFAULT_MODEL
     language: Literal["auto", "en", "fil", "taglish"] = "auto"
+
+    @field_validator("model")
+    @classmethod
+    def local_model(cls, value):
+        return validate_model(value)
 
     @field_validator("text")
     @classmethod
@@ -55,6 +62,16 @@ class MemoryRequest(BaseModel):
         if self.operation in {"update", "forget"} and self.id is None:
             raise ValueError("Memory identifier is required")
         return self
+
+
+class ModelRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    model: str
+
+    @field_validator("model")
+    @classmethod
+    def local_model(cls, value):
+        return validate_model(value)
 
 
 def create_app(token: str, on_ready=None, data_dir=None, provider=None) -> FastAPI:
@@ -120,13 +137,33 @@ def create_app(token: str, on_ready=None, data_dir=None, provider=None) -> FastA
     @app.post("/preferences")
     async def update_preferences(change: dict):
         try:
+            if "model" in change:
+                if conversation.busy.locked():
+                    raise HTTPException(409, "Stop the active reply before switching models")
+                async with conversation.busy:
+                    await require_installed(change["model"])
+                    return preferences.update(change)
             return preferences.update(change)
         except ValueError as error:
             raise HTTPException(422, str(error)) from error
+        except ProviderError as error:
+            raise HTTPException(409, str(error)) from error
 
     @app.get("/models")
     async def models():
-        return await installed_models()
+        catalog, loaded = await asyncio.gather(installed_models(), loaded_models())
+        return {**catalog, "loaded": loaded}
+
+    @app.post("/model-unload")
+    async def model_unload(change: ModelRequest):
+        if conversation.busy.locked():
+            raise HTTPException(409, "Stop the active reply before unloading a model")
+        try:
+            async with conversation.busy:
+                await unload_model(change.model)
+            return {"ok": True}
+        except (ProviderError, ValueError, asyncio.TimeoutError) as error:
+            raise HTTPException(409, "Could not unload the selected local model. Refresh and retry.") from error
 
     @app.get("/messages")
     async def messages():
@@ -166,13 +203,17 @@ def create_app(token: str, on_ready=None, data_dir=None, provider=None) -> FastA
     @app.post("/chat")
     async def chat(message: ChatRequest):
         async def events():
+            stage("chat_received")
             try:
+                if provider is None:
+                    await require_installed(message.model)
                 async for event in conversation.turn(message.text, message.model, message.language):
                     yield json.dumps(event, ensure_ascii=False) + "\n"
             except asyncio.CancelledError:
                 raise
             except (ProviderError, ValueError) as error:
-                yield json.dumps({"type": "error", "message": str(error), "state": "ERROR"}) + "\n"
+                yield json.dumps({"type": "error", "message": str(error), "state": "ERROR",
+                                  "code": getattr(error, "code", "CONTEXT_REJECTED")}) + "\n"
             except Exception:
                 yield json.dumps({
                     "type": "error",

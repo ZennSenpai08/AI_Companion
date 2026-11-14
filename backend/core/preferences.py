@@ -1,10 +1,10 @@
 """User settings persisted locally; engines must validate readiness before activation."""
 import json
 from datetime import datetime, timezone
+from backend.llm.models import DEFAULT_MODEL, validate_model
 
-DEFAULTS = {"model": "qwen3.5:0.8b", "language": "auto", "volume": 0.8,
-            "animation_intensity": 0.5, "cursor_tracking": True}
-MODELS = {"qwen3.5:0.8b", "qwen3.5:4b", "qwen3.5:9b"}
+DEFAULTS = {"model": DEFAULT_MODEL, "language": "auto", "volume": 0.8,
+            "animation_intensity": 0.5, "cursor_tracking": True, "bubble_hold_ms": 12000}
 LANGUAGES = {"auto", "en", "fil", "taglish"}
 
 
@@ -12,8 +12,8 @@ def validate_preferences(change):
     if not isinstance(change, dict) or set(change) - set(DEFAULTS):
         raise ValueError("Unknown settings")
     for name, value in change.items():
-        if name == "model" and (not isinstance(value, str) or value not in MODELS):
-            raise ValueError("Select a supported local model")
+        if name == "model":
+            validate_model(value)
         if name == "language" and (not isinstance(value, str) or value not in LANGUAGES):
             raise ValueError("Unknown language preference")
         if name in {"volume", "animation_intensity"} and (
@@ -22,6 +22,9 @@ def validate_preferences(change):
             raise ValueError("Setting must be a finite number between zero and one")
         if name == "cursor_tracking" and not isinstance(value, bool):
             raise ValueError("Cursor tracking must be boolean")
+        if name == "bubble_hold_ms" and (type(value) is not int or
+                value != 0 and not 3000 <= value <= 120000):
+            raise ValueError("Bubble timing must be 0 or 3000–120000 milliseconds")
     return change
 
 

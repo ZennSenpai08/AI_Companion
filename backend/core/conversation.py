@@ -3,6 +3,7 @@ import asyncio
 import uuid
 
 from backend.core.state import State, StateMachine
+from backend.core.diagnostics import stage
 from backend.llm.provider import ProviderError
 from backend.personality.persona import PersonaManager
 
@@ -33,6 +34,7 @@ class Conversation:
                 session = self.store.session()
                 prompt = self.persona.assemble(self.store.recent(session), self.store.recall(text),
                                                text, language)
+                stage("context_ready")
                 self.store.append(session, "user", text)
                 yield {"type": "state", "state": self.state, "turn_id": turn_id}
                 answer = ""
@@ -47,7 +49,11 @@ class Conversation:
                 self.store.append(session, "assistant", answer)
                 completed = True
                 self.machine.transition(State.IDLE)
-                yield {"type": "done", "turn_id": turn_id}
+                done = {"type": "done", "turn_id": turn_id}
+                metrics = getattr(self.provider, "completion_metrics", None)
+                if metrics is not None:
+                    done["metrics"] = metrics
+                yield done
                 yield {"type": "state", "state": self.state, "turn_id": turn_id}
             except (asyncio.CancelledError, GeneratorExit):
                 if not completed:

@@ -1,5 +1,42 @@
 # Electron native startup investigation — 2026-11-13–14
 
+Latest desktop foundation review: normal-Windows automated actual Mika acceptance PASS
+is confirmed by user and saved 23:20 UTC run. The smoke's code-0 exit is deliberate;
+interactive dev has no exit timer. Exact dev exit source needs user interaction evidence
+or new lifecycle logs. Diagnostics now distinguish Quit, single-instance forwarding and
+inherited smoke mode, without changing shutdown behavior. Manual controls remain open in
+DESKTOP_FOUNDATION_VERIFICATION.md. Fresh agent native run logs main-start, then aborts
+before app-ready at the runtime ACL check; no permissions were changed or retested for repair.
+
+## Latest runtime recovery and actual-app evidence
+
+Electron 45.3.0's package/lockfile have no postinstall binary downloader. Electron 42 changed
+this to lazy first-use installation, confirmed in the installed index.js/install.js and
+[official announcement](https://www.electronjs.org/blog/electron-42-0). Mika's direct spawn
+bypassed lazy installation. npm success did not ensure dist/electron.exe existed.
+The file, path.txt and version are present at this task's inspection; no separate runtime
+override or ignore-scripts configuration is active. No current download failure occurred.
+The exact step that installed it after the reported failure is not established.
+
+Added metadata-only shared resolution, explicit official pinned installation, platform/
+version/override checks, pre-Vite preflight and separate native spawn/frontend messages.
+Runtime check and idempotent official installer PASS, full typecheck/lint PASS. No flags,
+ACLs, application architecture or Electron version changed.
+
+Inspected the existing real Mika run mika-2026-11-13T22-41-50-736Z-5c0ba0c6: actual Vue
+settings screenshot, two visible secure mounted Vue windows, preload/IPC/backend/native
+control tests PASS. Exit 0 and backend process/listener cleanup establish automated graceful
+shutdown PASS for that run. This independently resolves the earlier shutdown uncertainty
+for Mika; the interrupted standalone probe's result remains unchanged. Updated-launcher
+normal-session retest and manual desktop observation are separate pending checks.
+
+Current agent desktop test does resolve/spawn the runtime, but exits 2147483651 at
+install_dir_access.cc:52 before main. This task records that exact new agent result without
+repeating repair, changing ACLs or invalidating the saved successful application run.
+Build/dev additionally hit esbuild parent-directory read denial; the user reports normal
+build success. See TEST_RESULTS.md and FRONTEND_BUILD.md for exact evidence/instructions.
+All sections below preserve the previous investigation state as history.
+
 Current status (2026-11-14): normal-session startup/renderer/visible window are verified;
 shutdown and Mika's actual Vue application are separate gates. ACL repair remains closed.
 

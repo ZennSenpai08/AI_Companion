@@ -1,14 +1,99 @@
+# Current bubble continuation — 2026-11-14
+
+The new overlay response bubble/input-hint UI passes vue-tsc, Electron/core TypeScript and
+JavaScript lint. Actual production assets build with:
+
+```powershell
+node node_modules/vite/bin/vite.js build --configLoader native
+```
+
+The default npm run build still hits the documented agent esbuild parent-directory read
+restriction; no packages/security settings were changed. Native smoke still fails before
+app-ready in the restricted agent. Normal-Windows startup PASS remains historical; run
+the actual new build there to verify caption layout and physical input. No rendered
+screenshot of this new UI was fabricated. See BILINGUAL_ENGLISH_RESPONSES.md.
+
 # Preparing and verifying the real Mika Vue application
+
+2026-11-14 update: current Vue selectors use installed compatible models; Settings includes
+confirmed model unload. Types/lint pass. Production build compiled 22 modules using
+`node node_modules/vite/bin/vite.js build --configLoader native` on Node 22.18.0.
+The config now uses fileURLToPath(import.meta.url) instead of CommonJS __dirname.
+The ordinary npm build still hits esbuild parent-directory access denial in this agent;
+no ACL/permissions changed. Vite documents [native config loading](https://vite.dev/config/).
+This compilation is not a visible Electron UI pass. Rebuild and test in normal PowerShell
+as described in MODEL_SWITCHING_AND_MEMORY.md; no dependency upgrade/reinstall needed.
+
+Current chat repair requires rebuilding dist for the new Vue initialization markers.
+Use LOCAL_REQUEST_CHAT_REPAIR.md for normal-Windows commands; normal dev and smoke now
+share prepared Python selection. Do not reinstall dependencies or model weights.
+
+For the current interactive desktop lifecycle/control audit and code-0 interpretation,
+see [desktop verification](DESKTOP_FOUNDATION_VERIFICATION.md). Normal-Windows automated
+Mika acceptance passes; manual dwell/controls/restart placement are tracked separately.
+Dev/smoke logs now identify Quit versus single-instance forwarding versus smoke mode.
 
 Manager: npm (existing setup/dev commands). Observed Node 22.18.0 / npm 11.10.0.
 Other package managers installed on the host do not change this project's choice.
-No package-lock.json, npm-shrinkwrap.json, pnpm-lock.yaml or yarn.lock currently exists.
-vue-tsc 3.0.6 is declared in package.json but is not installed or represented in a lockfile.
+The ordinary-PowerShell installation now supplies package-lock.json (lockfileVersion 3)
+and the pinned Vue toolchain. Preserve that lockfile; clean installations use npm ci.
 
 Keep the existing exact pins: Vue 3.5.45, Vite 7.3.1, plugin-vue 6.0.1, vue-tsc 3.0.6,
 TypeScript 5.9.3 and Electron 45.3.0. Do not replace these with latest to avoid an error.
 
-## Installation availability
+## Electron 45 native runtime recovery
+
+Electron 42+ no longer downloads a native binary in npm postinstall. The installed 45.3.0
+package has no postinstall entry and the lockfile has no install-script flag. Its official
+index.js downloads lazily when imported; Mika's direct spawn bypassed that step. Thus npm
+install can succeed while a native launcher still cannot find electron.exe. This is not
+evidence of a sandbox failure. Sources: [Electron 42 announcement](https://www.electronjs.org/blog/electron-42-0)
+and [official installation guide](https://www.electronjs.org/docs/latest/tutorial/installation).
+
+Install only the existing pinned runtime, without changing dependencies, flags or ACLs:
+
+```powershell
+cd C:\Users\Romcill\Desktop\AI-PROJECT
+npm run electron:install
+if ($LASTEXITCODE -ne 0) { throw 'Electron binary preparation failed' }
+npm run electron:check
+```
+
+The first command invokes this package's official install.js (equivalent to the documented
+install-electron bin), retaining its checksum verification, version, cache and inherited
+download settings. It may need GitHub access in ordinary PowerShell. It is explicit setup,
+not an automatic runtime network fallback. No dependency-wide reinstall is necessary.
+The executable and version file were already present when this task inspected them; both
+commands actually succeeded here without a new download. Why they appeared after the
+reported failed launches is not established from the supplied command history.
+
+Both dev and desktop-smoke now resolve the installed package, host-platform path marker,
+native file and matching version without importing its download-on-require entry point.
+ELECTRON_OVERRIDE_DIST_PATH is respected and checked; no machine path is hardcoded.
+Missing binary, stale version/platform and native spawn errors have distinct messages.
+Dev performs this preflight before starting Vite; a failed Vite process reports a frontend
+error and a nonzero exit. Existing renderer security and environment settings are retained.
+
+## Actual verification evidence — 2026-11-14
+
+The saved real Mika run at test-artifacts/electron-startup/
+mika-2026-11-13T22-41-50-736Z-5c0ba0c6/ contains desktop-smoke.json, launch.json and a nonempty
+desktop-preview.png. Inspection confirms two mounted Vue windows, visible secure renderers,
+readonly preload/IPC, backend health, topmost/click-through recovery and rejection of an
+unapproved action. Exit 0, backendProcessGone=true and backendListenerClosed=true establish
+that run's graceful automated shutdown. The screenshot shows Mika's Vue settings panel;
+it is not a diagnostic page. Manual observation of the user's desktop was not performed.
+
+Current source type checks and JS lint pass in the agent. Its standard build/dev commands
+are separately blocked by esbuild's denied parent-directory read. The user's ordinary-
+PowerShell production build passed (22 transformed modules) and existing dist is present.
+The agent desktop attempt resolves Electron but fails before the main process at the
+runtime ACL check (2147483651); no ACL changes or sandbox bypass were attempted. This does
+not invalidate the saved successful application run or the user's normal-session probe.
+Run updated npm run test:desktop and npm run dev in ordinary PowerShell to confirm the
+new launcher paths. Use Quit Mika for a normal manual dev shutdown.
+
+## Earlier installation blocker (historical)
 
 The project-local .cache/npm directory passes a real temporary write test. Registry DNS
 resolution succeeds, but TCP connection to registry.npmjs.org:443 is denied with Windows
@@ -19,7 +104,7 @@ An actual npm install --package-lock-only --ignore-scripts with retries disabled
 failed on registry access, creating no lockfile and changing no installed packages.
 Raw commands/output: test-artifacts/electron-startup/dependency-install-diagnosis.json.
 
-## First preparation in ordinary Windows PowerShell
+## First dependency preparation (already performed by user)
 
 The first command resolves the graph into a real lockfile without dependency lifecycle
 scripts or module installation. The next installs that locked graph into the existing

@@ -51,6 +51,15 @@ class ConversationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.store.recent(self.store.session())[-1]["role"], "assistant")
         self.assertEqual(self.store.list_memories(), [])
 
+    async def test_completed_provider_metrics_reach_done_without_entering_history(self):
+        provider = FixtureProvider()
+        provider.completion_metrics = {"load_ms": 2, "eval_count": 3}
+        events = [event async for event in Conversation(self.store, provider).turn(
+            "Hello", "qwen3.5:0.8b")]
+        done = next(event for event in events if event["type"] == "done")
+        self.assertEqual(done["metrics"], provider.completion_metrics)
+        self.assertNotIn("metrics", self.store.recent(self.store.session())[-1])
+
     async def test_cancel_closes_provider_without_saving_partial_answer(self):
         provider = FixtureProvider(wait=True)
         conversation = Conversation(self.store, provider)

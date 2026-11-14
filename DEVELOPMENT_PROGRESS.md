@@ -1,5 +1,200 @@
 # Development progress — 2026-11-14
 
+## Latest: Qwen2.5 readiness and native bubble acceptance preparation
+
+Continued verified 2f82c3f bundle without replacing source or original Git metadata.
+Qwen2.5 remains uninstalled; fresh readiness also measured less than its 3 GiB RAM floor.
+No download/default change. Fresh Qwen0.8 generated one English greeting, then the guard
+refused the Tagalog case at 1.621 GiB free. No new bilingual score or model winner.
+Actual authenticated unload removed residency, returned about 1.05 GiB RAM and reduced
+whole-GPU use 1822→150 MiB; test backend cleanup PASS. No user process was terminated.
+
+Added smoke-only native bubble verification for streaming DOM updates, 360x560/240x300
+geometry, wrapping/scrolling, contrast, transparent host, no chatbox and native movement.
+Synthetic test captions are labelled, never inference; original bounds restored even on
+failure. Acceptance now requires the report. Agent native startup and browser access remain
+blocked, so these new physical/layout checks are NOT VERIFIED on native Windows.
+
+69 Node / 70 Python tests, type checks, JS lint PASS. Native-loader production Vue build
+PASS; ordinary build still denied in agent esbuild. Desktop and real-chat native tests
+BLOCKED; real API preflight correctly rejected low RAM. Report and exact next commands:
+docs/QWEN25_BUBBLE_VERIFICATION.md. Stop here; no microphone/TTS/Live2D implementation.
+
+## Latest: bilingual understanding / English response policy and avatar-first presentation
+
+Continued and verified complete checkpoint 529de0d; preserved all intervening source.
+Implemented protected English-only instructions for mixed-language input, input-language
+UI hints, a bounded relevant-only editable Filipino-expression glossary, and shared-policy
+support for qwen2.5:1.5b. Existing saved models/history and memory protections remain intact.
+No downloads, ACL changes, dependency upgrades or audio activation. Requested Qwen2.5,
+Gemma1B and optional Qwen3 1.7B are absent; no comparative winner can be claimed.
+
+Retained and finished the pending main-owned response presentation and overlay bubble,
+optional controls/history startup, caption timing and stale-response cancellation. This is
+text beneath a placeholder, not speech or Live2D. Type/build/unit tests do not establish
+physical Windows click-through or bubble visual acceptance. Native agent launch remains
+blocked independently of preserved successful normal-Windows evidence.
+
+Fresh real Qwen0.8 testing: eight Mika+glossary cases completed, then the unchanged RAM
+guard stopped the suite. Several replies ignore English-only policy, misunderstand slang
+or give bad debugging advice. **Conversational quality FAILED; implementation is not a
+quality guarantee.** Other attempts crossed below 2 GiB after cold loading. See
+docs/BILINGUAL_ENGLISH_RESPONSES.md and TEST_RESULTS.md for actual artifacts and limits.
+Final regression: 66 Node / 70 Python PASS, 70 guarded Python tests PASS with zero
+unexpected external attempts; types/lint PASS, production Vue build via native loader PASS.
+An expanded API fixture's stale expected message count was repaired and rerun. Full
+firewall-isolated real inference and native bubble QA remain open.
+Next gate: free sufficient RAM and evaluate one approved installed candidate with the
+bilingual matrix, stability suite and actual native streaming. No STT/TTS/Live2D work yet.
+
+## Latest: safe model switching and memory repair — implemented, native UI QA pending
+
+Continued aa0bb05 and all intervening changes; verified its full bundle/ref. Saved normal
+Windows real-UI transport/persistence/interrupt PASS is preserved. Agent native remains
+separately restricted. No ACL changes, model downloads/removals or sandbox bypass.
+
+Confirmed the recurring message is the intentional per-turn available-RAM guard. Saved
+Windows snapshots crossed below 2 GiB (1.78/1.81 GiB); preflight approval is not a memory
+reservation. Node/Windows available-physical-RAM measurements agree within snapshot drift.
+Thresholds remain intact. Error now shows actual availability and selected model.
+
+Centralized compatibility/default/threshold policy; Vue selectors use installed models;
+backend validates local GGUF availability before switching and real chat. Explicit model
+unload retains weights/history and is denied during generation. Shared settings persist
+in SQLite; no new AI/speech/avatar framework. Context truncation now retains complete
+user-led turns after a reproduced orphan-assistant regression.
+
+Fresh real five-turn API trace + authenticated unload + backend restart PASS. Qwen 0.8B
+still fails language/instruction quality; direct-vs-Mika controlled experiments show model
+and persona sensitivity, not stream corruption. Gemma/Qwen 1.7B absent, no comparison or
+download claimed. 62 Node/65 Python tests, types and JS lint PASS. Native-loader production
+Vue build PASS (22 modules); default config bundling still denied in agent. Updated visible
+selectors/unload need normal-Windows verification. See docs/MODEL_SWITCHING_AND_MEMORY.md
+for commands, real timings, source changes, artifacts and limitations. Earlier sections
+below are historical and superseded where they describe unavailable Ollama/native evidence.
+
+## Current local-request/chat repair
+
+Continued from verified 04cf812. Reproduced the Invalid local request mechanism: normal
+launch selected .venv Python 3.9 lacking FastAPI/Uvicorn, while smoke selected the working
+.venv-runtime Python 3.10.11. Failed startup clears port/token before Vue requests valid
+/preferences and /messages. Unified development interpreter selection, retained explicit
+override, centralized ready-gated authenticated requests and preserved/strengthened the
+low-level loopback/credential/route/body guard. No security bypass or dependency upgrade.
+
+Old native real-chat failure reached user-message persistence; Ollama HTTP metadata shows
+two client-closed requests (499, 41.91 s/29.02 s), shorter than the 90-second provider
+deadline. Actor unconfirmed; a second non-runner prompt is present. Old evidence wait
+ignored interruption/replacement and discarded its failed turn. New runner records stages,
+typed failures, timestamps, bootstrap/Vue readiness, actual Send and DOM evidence, and
+fails interruptions/interference immediately without extending inference deadlines.
+
+Added development-only sanitized backend stage forwarding; arbitrary stderr/extra fields
+stay private. Provider errors distinguish missing model, unavailable connection, response
+wait and inference timeout. New renderer/tray action messages aid future lifecycle review;
+normal close-to-hide/Quit behavior unchanged. docs/LOCAL_REQUEST_CHAT_REPAIR.md has detail.
+
+Real backend/Ollama verification now PASS (two runs): existing 0.40.16 + installed 0.8B
+Q8_0, actual generated English/Taglish/context/persona responses, exact SQLite history
+restored after backend restart, supervised child stopped. Cold first delta 72.343 s;
+second run first 5.394 s, warm 0.114–0.151 s. Language/context quality is poor/inconsistent,
+not accepted as finished. No additional weights downloaded. These are headless real
+backend tests, not actual Vue-model acceptance. Current agent native/build restrictions
+still block that gate; normal Windows rebuild/retest commands provided and requested.
+
+Fresh source/protocol verification recorded in TEST_RESULTS.md: full types/lint, expanded
+Node/Python suites pass. Regression cases cover failed/default startup, valid/invalid
+requests, auth, privacy-filtered diagnostics, failed-case retention and interrupted waits.
+Next: updated normal-session native real-chat run, review stage/result and quality before
+declaring this desktop AI milestone resolved. No voice/avatar/additional-model work.
+
+## Current real Ollama integration attempt — IN PROGRESS / real inference BLOCKED
+
+Verified f1dfce0 full-history bundle/ref; retained all working source, Git metadata and
+checkpoints. Existing Vue/preload/IPC/FastAPI/provider/persona/SQLite path is connected and
+covered by fixture and real-loopback protocol tests; no duplicate provider/brain created.
+
+Readiness: Ollama absent on current PATH/common install locations; no 11434 listener.
+Python metadata calls timed out; new Node preflight reports ECONNREFUSED. Version/models
+are unknown. 15.31 GiB usable RAM, initially 0.58 GiB free (later 0.39 GiB), RTX 2050 4 GiB,
+driver 595.79, 113.95 GiB disk free initially. The unchanged 2 GiB Lite admission fails.
+No installer, model download, forced inference or unrelated process termination performed.
+
+Implemented read-only preflight and explicit real Vue conversation acceptance mode using
+the existing provider. It records real outputs, server/client timing, loaded-model memory,
+system samples, SQLite/backend restart + Vue restore and Stop/recovery when prerequisites
+are met. Protected persona/hash and no-partial-assistant persistence are checked; semantic
+identity/language quality, full Electron restart and network isolation need separate review.
+Ordinary default desktop smoke does not enable this mode. Added sanitized optional done
+metrics and fixed HTTP read-timeout classification; no persona rewrite or security change.
+
+Verification: full types/JS lint PASS; 50 Node and 55 Python tests PASS, no skips. New tests
+are explicitly fixtures/protocol, not model results. Initial TypeScript annotation error
+was fixed and checks rerun. Ruff is unavailable in .venv-runtime. Build and default native
+regression remain blocked by agent esbuild/runtime ACL restrictions, with logs preserved.
+Actual test:chat-real stops at preflight, inferenceAttempted=false. No real language output,
+model latency, token rate or real-model restart acceptance is claimed. Exact procedure:
+docs/REAL_OLLAMA_TEST.md. Next: ordinary-session Ollama setup + one 0.8B model, reclaim RAM,
+run real acceptance and review outputs before any larger-model/voice/avatar milestone.
+
+## Current desktop foundation review and Ollama preparation
+
+Verified 26ad2b2 with bundle verify/list-heads; all pre-existing work and checkpoints retained.
+Accepted the user's current native smoke PASS and inspected its newer saved 23:20 UTC
+artifact: two secure Vue windows, preload/IPC/backend/native control checks and graceful
+backend/process/socket cleanup PASS. Interactive dwell, dragging, tray use and restart
+placement remain manual gates. The reported bare dev code-0 line does not identify its
+cause: explicit Quit, single-instance forwarding or an inherited smoke flag are possible.
+
+Added dev/smoke-only lifecycle console facts and an inherited-smoke warning. No change to
+quit ordering, close-to-hide behavior, timers, credentials or security policy. Normal dev
+has no automatic exit timer; Settings X hides the panel, while Quit stops the backend and
+closes both windows. No genuine shutdown defect was demonstrated or patched.
+
+Reviewed actual desktop controls and full existing text/persona/SQLite/provider path;
+see docs/DESKTOP_FOUNDATION_VERIFICATION.md for source mapping and pending manual cases.
+Microphone remains off with enable/PTT disabled. The overlay is diagnostic, not Live2D.
+Created docs/OLLAMA_INTEGRATION_READINESS.md: reuse existing streaming adapter and profile,
+start future evaluation with 0.8B, compare 4B only with headroom. No Ollama integration
+implementation or download was performed. Local catalog unavailable, no Ollama on PATH,
+15.31 GiB usable RAM / 0.32 GiB free at inspection; even the Lite admission guard is unmet.
+
+Fresh verification: 48 Node and 50 backend passes (zero skips), full Vue/Electron/core
+types and JS lint PASS. Build fails in the agent at esbuild's parent read restriction;
+fresh native attempt resolves runtime and logs main-start but aborts at ACL check before
+app-ready. No permission repair attempted. User normal-session passes remain valid.
+Next task: identify the interactive exit reason from the new trace/user observation and
+finish manual desktop sign-off, then separately authorize/execute real-model acceptance.
+Stop after this review; no speech, avatar, memory feature or model changes.
+
+## Current runtime recovery task
+
+Continued from a4a470a; verified its full-history bundle. The user's newer working HEAD
+1dee2c7 and untracked package-lock.json were preserved. Pre-change recoverable checkpoint:
+bfc2a0b. No protected Git writes, dependency upgrades, runtime ACL changes or sandbox bypass.
+
+Root cause: Electron 45.3.0 no longer has a binary-downloading postinstall. Mika directly
+spawned dist/electron.exe, bypassing the package's lazy installer. npm installation success
+therefore did not ensure a native runtime. At current inspection the runtime/path/version
+are present. Exact prior acquisition command is unknown; current official install and
+read-only resolver commands both pass without downloading a replacement.
+
+Implemented shared metadata-only platform/override/version-aware resolution, explicit
+npm run electron:install/check, early dev preflight, distinct native/Vite error messages,
+and independent renderer/shutdown reporting in actual-app logs. Setup explicitly prepares
+the pinned binary. Eight runtime regressions include a real child preflight that verifies
+Vite is not started on a missing runtime. No application architecture or AI features changed.
+
+Found and inspected the existing genuine Mika success artifact from 22:41 UTC: both Vue
+windows/secure renderers, preload/IPC, backend health, native controls, screenshot and
+normal process/socket cleanup pass. Graceful automated native shutdown is verified for
+that run. The updated launchers still require ordinary-session retest; current agent
+native execution is blocked at Electron's runtime ACL check, left untouched. User build
+success is accepted; agent build/dev fail at a separate esbuild parent read restriction.
+Source typecheck/lint, 48 Node and 50 backend regression checks pass; no tests skipped.
+Next: normal-session updated launcher/dev acceptance and manual desktop controls review.
+No AI/speech/memory/Live2D feature work begins in this scoped recovery task.
+
 ## Latest Vue-unblock and actual-app preparation
 
 Accepted and inspected the user's genuine visible-native result: normal-session startup,

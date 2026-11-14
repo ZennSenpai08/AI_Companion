@@ -4,6 +4,13 @@
 Build a NEW, original, Windows-first, offline-capable desktop AI companion with a draggable transparent Live2D girl avatar, live English/Filipino/Taglish speech conversation, expressive licensed voice, stable original personality, and user-controlled long-term memory. The app is a desktop product, NOT a browser chatbot or website. Third-party projects are references and optional dependencies; do not fork or include any of the user's existing repositories.
 
 ## Product Principles
+0. **Voice-first, English replies.** Mika is an animated floating companion with a compact
+   streaming response bubble beneath the avatar; the panel is optional controls/history.
+   Understand English, Filipino, Tagalog, Taglish and contextual slang, but generate English
+   responses under the protected profile. Existing language preferences are input hints.
+   Do not label text generation as speech or the placeholder visual as Live2D. Next gates:
+   coherent bilingual understanding → bubble QA → consented STT → English TTS → full voice
+   → licensed Live2D/lip sync → emotions → advanced memory. No parallel heavy model services.
 1. **Offline by default.** After first-time setup and model download, text chat, microphone/STT, local LLM inference, TTS, animations, and memory must operate with all external networking disabled. Network calls are opt-in, not fallback behavior.
 2. **Original character.** References to Neuro-sama, character.ai personas, Pan VTuber, and Fish Audio 'Pretty girl' guide general experience and voice style only. Do not reproduce protected characters, scripts, avatar art, or unlicensed identifiable voices.
 3. **Windows desktop first.** Build a transparent, frameless, draggable, adjustable, always-on-top companion window; separate settings/chat panels; tray and recovery controls; microphone permission indicator and mute control. No web deployment is needed for MVP.
@@ -17,7 +24,10 @@ Build a NEW, original, Windows-first, offline-capable desktop AI companion with 
 - Desktop: Electron, Vue 3 or React, TypeScript, Vite, secure IPC, electron-builder.
 - Live2D: official Live2D Cubism SDK for Web (license review) and model-compatible renderer. Start with an explicitly licensed official sample model; eventual original rigged character.
 - Backend: Python 3.12, FastAPI, Pydantic; spawned and supervised by Electron. Async streaming/events over loopback WebSocket.
-- LLM: Ollama with `qwen3.5:4b` baseline; optionally `qwen3.5:9b` on adequate memory/hardware. Keep an Ollama-free llama.cpp adapter possible.
+- LLM: Ollama; evaluate installed `qwen2.5:1.5b` first, `gemma3:1b` as alternative and
+  `qwen3:1.7b` optionally. Existing `qwen3.5:0.8b` is a transport baseline, not quality-approved.
+  Central model_policy.json owns tags/defaults/RAM thresholds. Do not download weights
+  without authorization or weaken memory admission. Keep a future llama.cpp adapter possible.
 - STT: Silero VAD + faster-whisper multilingual (`small` to start; `medium`/`large-v3-turbo` for evaluation). Buzz is a test/reference UI, not a required runtime service.
 - TTS: OmniVoice, via an adapter or a compatible local runner; use licensed recordings for characterization. Investigate other candidates only if they pass Filipino/Taglish speech tests and offline/licensing checks. Fish Speech S2-Pro / Drama 3 are optional high-VRAM research alternatives.
 - Memory: SQLite for sessions/preferences/episodic summaries; optional self-hosted Hindsight for retain/recall/reflect; optional OpenViking for structured local knowledge/RAG, enabled with local embeddings and local VLM; AnythingLLM is optional developer/admin document testing, not required at runtime.

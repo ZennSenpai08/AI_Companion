@@ -1,6 +1,7 @@
 """Validated runtime configuration; no remote endpoints or implicit downloads."""
 from dataclasses import dataclass
 from pathlib import Path
+from backend.llm.models import DEFAULT_MODEL
 
 
 @dataclass(frozen=True)
@@ -9,7 +10,7 @@ class RuntimeConfig:
     offline: bool = True
     microphone_enabled: bool = False
     retain_audio: bool = False
-    llm_model: str = "qwen3.5:0.8b"
+    llm_model: str = DEFAULT_MODEL
 
     def __post_init__(self):
         if not self.offline:

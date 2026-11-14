@@ -1,15 +1,48 @@
 # Mika — offline Windows desktop companion
 
 **Status: development preview; not a finished speaking Live2D product.**
+
+Latest [Qwen2.5 / bubble verification](docs/QWEN25_BUBBLE_VERIFICATION.md): Qwen2.5 still
+needs separate installation and memory headroom. Native smoke now measures bubble layout,
+stream updates and movement at normal/minimum sizes; execution in ordinary Windows is
+pending. No new model-quality winner or native visual pass is claimed.
+
+Mika's intended interface is voice-first: multilingual input, English replies, and a
+compact response bubble beneath a floating animated avatar. The controls/history panel
+is optional. Current source displays streaming text beneath a clearly labelled placeholder;
+microphone, speech and Live2D remain off. Normal startup opens the overlay; use its
+Controls/history button, tray menu or Ctrl+Shift+M to open controls.
+
+Latest [bilingual English-response milestone](docs/BILINGUAL_ENGLISH_RESPONSES.md): protected
+English policy and relevant local slang hints implemented. Real Qwen0.8 still fails quality;
+Qwen2.5 1.5B/Gemma1B/Qwen3 1.7B are uninstalled and no winner is claimed. New bubble native
+QA is pending. Low-memory rejections are preserved, not bypassed. Tests and exact candidate
+evaluation commands are in the linked report.
+
+Current [local-request/chat repair](docs/LOCAL_REQUEST_CHAT_REPAIR.md): prepared Python
+selection and request readiness corrected; genuine Ollama backend responses and SQLite
+restoration verified. Updated native Vue-model retest remains pending. Use the installed
+0.8B model; no additional download. Natural Taglish/context quality is not accepted yet.
+
+Real text setup/verification: [Windows Ollama procedure](docs/REAL_OLLAMA_TEST.md).
+`npm run ollama:check` performs read-only readiness; `npm run test:chat-real` explicitly
+tests the actual Vue pipeline with a prepared model. Current agent result is BLOCKED,
+not successful inference. No weights are downloaded automatically.
 Fresh original source; no personal repositories or third-party application source reused.
 See [development report](docs/DEVELOPMENT_REPORT.md), [progress](DEVELOPMENT_PROGRESS.md),
 [test evidence](TEST_RESULTS.md) and [known issues](KNOWN_ISSUES.md).
+
+Current desktop [verification report](docs/DESKTOP_FOUNDATION_VERIFICATION.md) separates
+the passing actual-app Windows smoke from manual controls and interactive exit tracing.
+The next model-quality milestone is prepared in [Ollama readiness](docs/OLLAMA_INTEGRATION_READINESS.md).
+Real inference measurements exist; no new model was downloaded during this continuation.
 
 The source contains a secure Electron shell, Vue/TypeScript panels, supervised FastAPI
 bootstrap, local Ollama text adapter, original protected Mika profile, and SQLite
 conversation/explicit-memory services. Real FastAPI and supervised-backend checks now pass on the recovered Python 3.10.11
 runtime. Normal-session native startup, visibility and sandboxed rendering pass. The real
-Mika Vue interface, graceful shutdown and real-model acceptance remain unverified.
+Mika Vue interface and automated graceful shutdown now pass in a saved genuine native
+test run. Updated launcher normal-session retest and real-model acceptance remain pending.
 STT/TTS/Live2D are not enabled.
 
 ## Setup on Windows
@@ -48,15 +81,17 @@ node scripts/run-visible-native-probe.cjs
 
 It stays open until you close it and saves per-run visibility/security/exit logs. User
 appearance is confirmed by the user; graceful shutdown and the built Vue/Mika interface
-remain pending. This
+were independently verified in the saved actual Mika run, not by this probe. This
 diagnostic is separate from the original automated probe; ACLs need no further changes.
 
 The active project now lives at the workspace root after user commit fa5871e. The
 frontend remains Vue; it has not been migrated to React. See [identity audit](docs/PROJECT_IDENTITY.md).
-Latest executed Node suite: 40 passes; the earlier Python suite has 50 passes and was not
-rerun in this task. These do not establish actual Mika UI, model inference or spoken
-conversation. [Native investigation](docs/ELECTRON_STARTUP_INVESTIGATION.md) separates the
-successful normal-session startup from restricted-agent limitations and shutdown evidence.
+Latest executed suites: 59 Node and 56 Python passes. The separate saved native Mika run
+verifies Vue/preload/IPC/backend and graceful shutdown; automated tests do not establish
+real inference or spoken conversation. [Native investigation](docs/ELECTRON_STARTUP_INVESTIGATION.md)
+separates that evidence from restricted-agent limitations. Electron 42+ needs explicit
+binary preparation: use npm run electron:install, then npm run electron:check. See the
+frontend preparation guide for normal-session launcher retesting.
 
 To preserve current source without writing the restricted main .git:
 
